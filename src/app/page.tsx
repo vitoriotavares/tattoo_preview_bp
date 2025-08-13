@@ -4,10 +4,14 @@ import { UserProfile } from "@/components/auth/user-profile"
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col grain">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Next.js Starter Kit</h1>
+          <h1 className="text-2xl font-bold">
+            <span className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,color-mix(in_oklab,var(--primary)_85%,white_0%),color-mix(in_oklab,var(--primary)_50%,white_0%))]">
+              Next.js Starter Kit
+            </span>
+          </h1>
           <UserProfile />
         </div>
       </header>
@@ -77,7 +81,7 @@ export default function Home() {
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">3. Try the features</h4>
                 <div className="space-y-2">
-                  <Button asChild size="sm" className="w-full">
+                  <Button asChild size="sm" className="w-full glow">
                     <Link href="/dashboard">View Dashboard</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="w-full">

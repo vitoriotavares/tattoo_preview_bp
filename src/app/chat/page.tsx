@@ -1,6 +1,6 @@
 "use client"
 
-import { useChat } from "ai/react"
+import { useChat } from "@ai-sdk/react"
 import { Button } from "@/components/ui/button"
 import { UserProfile } from "@/components/auth/user-profile"
 import { useSession } from "@/lib/auth-client"

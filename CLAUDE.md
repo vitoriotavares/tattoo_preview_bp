@@ -1,0 +1,1 @@
+- Always run the db generate, migrate and build commands to check for errors after completing your changes.

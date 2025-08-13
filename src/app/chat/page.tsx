@@ -7,7 +7,6 @@ import { useSession } from "@/lib/auth-client";
 import { useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
-import type { CodeComponent } from "react-markdown/lib/ast-to-react";
 
 const H1: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = (props) => (
   <h1 className="mt-2 mb-3 text-2xl font-bold" {...props} />
@@ -35,6 +34,7 @@ const Anchor: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = (
 ) => (
   <a
     className="underline underline-offset-2 text-primary hover:opacity-90"
+    target="_blank"
     rel="noreferrer noopener"
     {...props}
   />
@@ -47,8 +47,11 @@ const Blockquote: React.FC<React.BlockquoteHTMLAttributes<HTMLElement>> = (
     {...props}
   />
 );
-const Code: CodeComponent = ({ inline, children, ...props }) => {
-  if (inline) {
+const Code: Components["code"] = ({ children, className, ...props }) => {
+  const match = /language-(\w+)/.exec(className || "");
+  const isInline = !match;
+
+  if (isInline) {
     return (
       <code className="rounded bg-muted px-1 py-0.5 text-xs" {...props}>
         {children}
@@ -116,11 +119,7 @@ function renderMessageContent(message: MaybePartsMessage): ReactNode {
     : [];
   return parts.map((p, idx) =>
     p?.type === "text" && p.text ? (
-      <ReactMarkdown
-        key={idx}
-        linkTarget="_blank"
-        components={markdownComponents}
-      >
+      <ReactMarkdown key={idx} components={markdownComponents}>
         {p.text}
       </ReactMarkdown>
     ) : null

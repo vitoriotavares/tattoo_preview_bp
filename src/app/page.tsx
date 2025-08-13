@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SetupChecklist } from "@/components/setup-checklist";
 
 export default function Home() {
   return (
@@ -44,6 +45,8 @@ export default function Home() {
           </div>
 
           <div className="space-y-6 mt-12">
+            <SetupChecklist />
+
             <h3 className="text-2xl font-semibold">Next Steps</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="p-4 border rounded-lg">

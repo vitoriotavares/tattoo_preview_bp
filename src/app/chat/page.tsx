@@ -4,10 +4,12 @@ import { useChat } from "@ai-sdk/react"
 import { Button } from "@/components/ui/button"
 import { UserProfile } from "@/components/auth/user-profile"
 import { useSession } from "@/lib/auth-client"
+import { useState } from "react"
 
 export default function ChatPage() {
   const { data: session, isPending } = useSession()
-  const { messages, input, handleInputChange, handleSubmit } = useChat()
+  const { messages, sendMessage, status } = useChat()
+  const [input, setInput] = useState("")
 
   if (isPending) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>
@@ -56,14 +58,23 @@ export default function ChatPage() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          const text = input.trim()
+          if (!text) return
+          sendMessage({ text })
+          setInput("")
+        }}
+        className="flex gap-2"
+      >
         <input
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Type your message..."
           className="flex-1 p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
         />
-        <Button type="submit" disabled={!input.trim()}>
+        <Button type="submit" disabled={!input.trim() || status === "streaming"}>
           Send
         </Button>
       </form>

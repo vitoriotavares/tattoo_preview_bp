@@ -133,79 +133,76 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
 
   if (isPending) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <div className="container mx-auto px-4 py-12">Loading...</div>;
   }
 
   if (!session) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <UserProfile />
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          <UserProfile />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-4 pb-4 border-b">
-        <h1 className="text-2xl font-bold">AI Chat</h1>
-        <div className="flex items-center gap-4">
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b">
+          <h1 className="text-2xl font-bold">AI Chat</h1>
           <span className="text-sm text-muted-foreground">
             Welcome, {session.user.name}!
           </span>
-          <UserProfile />
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {messages.length === 0 && (
-          <div className="text-center text-muted-foreground">
-            Start a conversation with AI
-          </div>
-        )}
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`p-3 rounded-lg ${
-              message.role === "user"
-                ? "bg-primary text-primary-foreground ml-auto max-w-[80%]"
-                : "bg-muted max-w-[80%]"
-            }`}
-          >
-            <div className="text-sm font-medium mb-1">
-              {message.role === "user" ? "You" : "AI"}
+        <div className="min-h-[50vh] overflow-y-auto space-y-4 mb-4">
+          {messages.length === 0 && (
+            <div className="text-center text-muted-foreground">
+              Start a conversation with AI
             </div>
-            <div>{renderMessageContent(message as MaybePartsMessage)}</div>
-          </div>
-        ))}
-      </div>
+          )}
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`p-3 rounded-lg ${
+                message.role === "user"
+                  ? "bg-primary text-primary-foreground ml-auto max-w-[80%]"
+                  : "bg-muted max-w-[80%]"
+              }`}
+            >
+              <div className="text-sm font-medium mb-1">
+                {message.role === "user" ? "You" : "AI"}
+              </div>
+              <div>{renderMessageContent(message as MaybePartsMessage)}</div>
+            </div>
+          ))}
+        </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const text = input.trim();
-          if (!text) return;
-          sendMessage({ role: "user", parts: [{ type: "text", text }] });
-          setInput("");
-        }}
-        className="flex gap-2"
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-        <Button
-          type="submit"
-          disabled={!input.trim() || status === "streaming"}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const text = input.trim();
+            if (!text) return;
+            sendMessage({ role: "user", parts: [{ type: "text", text }] });
+            setInput("");
+          }}
+          className="flex gap-2"
         >
-          Send
-        </Button>
-      </form>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1 p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <Button
+            type="submit"
+            disabled={!input.trim() || status === "streaming"}
+          >
+            Send
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

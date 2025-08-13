@@ -1,21 +1,9 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { UserProfile } from "@/components/auth/user-profile"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col grain">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">
-            <span className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,color-mix(in_oklab,var(--primary)_85%,white_0%),color-mix(in_oklab,var(--primary)_50%,white_0%))]">
-              Next.js Starter Kit
-            </span>
-          </h1>
-          <UserProfile />
-        </div>
-      </header>
-
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="space-y-4">
@@ -23,7 +11,8 @@ export default function Home() {
               Welcome to Your Next.js Boilerplate
             </h2>
             <p className="text-xl text-muted-foreground">
-              A complete starter kit with authentication, database, AI integration, and modern tooling
+              A complete starter kit with authentication, database, AI
+              integration, and modern tooling
             </p>
           </div>
 
@@ -58,9 +47,12 @@ export default function Home() {
             <h3 className="text-2xl font-semibold">Next Steps</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">1. Set up environment variables</h4>
+                <h4 className="font-medium mb-2">
+                  1. Set up environment variables
+                </h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Copy <code>.env.example</code> to <code>.env.local</code> and configure:
+                  Copy <code>.env.example</code> to <code>.env.local</code> and
+                  configure:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                   <li>DATABASE_URL (PostgreSQL connection string)</li>
@@ -84,7 +76,12 @@ export default function Home() {
                   <Button asChild size="sm" className="w-full glow">
                     <Link href="/dashboard">View Dashboard</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="w-full">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
                     <Link href="/chat">Try AI Chat</Link>
                   </Button>
                 </div>
@@ -92,7 +89,8 @@ export default function Home() {
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">4. Start building</h4>
                 <p className="text-sm text-muted-foreground">
-                  Customize the components, add your own pages, and build your application on top of this solid foundation.
+                  Customize the components, add your own pages, and build your
+                  application on top of this solid foundation.
                 </p>
               </div>
             </div>
@@ -106,5 +104,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

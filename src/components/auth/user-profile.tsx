@@ -27,6 +27,7 @@ export function UserProfile() {
           <AvatarImage
             src={session.user?.image || ""}
             alt={session.user?.name || "User"}
+            referrerPolicy="no-referrer"
           />
           <AvatarFallback>
             {(

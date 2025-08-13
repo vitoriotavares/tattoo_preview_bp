@@ -74,9 +74,14 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mb-2">
                   Run database migrations:
                 </p>
-                <code className="text-sm bg-muted p-2 rounded block">
-                  npx drizzle-kit push
-                </code>
+                <div className="space-y-2">
+                  <code className="text-sm bg-muted p-2 rounded block">
+                    npm run db:generate
+                  </code>
+                  <code className="text-sm bg-muted p-2 rounded block">
+                    npm run db:migrate
+                  </code>
+                </div>
               </div>
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">3. Try the features</h4>

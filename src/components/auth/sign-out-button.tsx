@@ -1,33 +1,31 @@
-"use client"
+"use client";
 
-import { signOut, useSession } from "@/lib/auth-client"
-import { Button } from "@/components/ui/button"
+import { signOut, useSession } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function SignOutButton() {
-  const { data: session, isPending } = useSession()
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
 
   if (isPending) {
-    return <Button disabled>Loading...</Button>
+    return <Button disabled>Loading...</Button>;
   }
 
   if (!session) {
-    return null
+    return null;
   }
 
   return (
     <Button
       variant="outline"
       onClick={async () => {
-        await signOut({
-          fetchOptions: {
-            onSuccess: () => {
-              window.location.href = "/"
-            },
-          },
-        })
+        await signOut();
+        router.replace("/");
+        router.refresh();
       }}
     >
       Sign out
     </Button>
-  )
+  );
 }

@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SetupChecklist } from "@/components/setup-checklist";
+import { useDiagnostics } from "@/hooks/use-diagnostics";
 
 export default function Home() {
+  const { isAuthReady, isAiReady, loading } = useDiagnostics();
   return (
     <div className="min-h-screen flex flex-col grain">
       <main className="flex-1 container mx-auto px-4 py-12">
@@ -76,17 +80,42 @@ export default function Home() {
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">3. Try the features</h4>
                 <div className="space-y-2">
-                  <Button asChild size="sm" className="w-full glow">
-                    <Link href="/dashboard">View Dashboard</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                  >
-                    <Link href="/chat">Try AI Chat</Link>
-                  </Button>
+                  {(loading || !isAuthReady) ? (
+                    <Button 
+                      size="sm" 
+                      className="w-full glow" 
+                      disabled={true}
+                    >
+                      View Dashboard
+                    </Button>
+                  ) : (
+                    <Button asChild size="sm" className="w-full glow">
+                      <Link href="/dashboard">
+                        View Dashboard
+                      </Link>
+                    </Button>
+                  )}
+                  {(loading || !isAiReady) ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      disabled={true}
+                    >
+                      Try AI Chat
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <Link href="/chat">
+                        Try AI Chat
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="p-4 border rounded-lg">
@@ -103,7 +132,21 @@ export default function Home() {
 
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
         <div className="container mx-auto px-4">
-          Built with Next.js, Better Auth, Drizzle ORM, and Vercel AI SDK
+          <p className="mb-2">
+            Boilerplate template by Leon van Zyl
+          </p>
+          <p>
+            Visit{" "}
+            <a 
+              href="https://youtube.com/@leonvanzyl" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              @leonvanzyl on YouTube
+            </a>
+            {" "}for tutorials on using this template
+          </p>
         </div>
       </footer>
     </div>

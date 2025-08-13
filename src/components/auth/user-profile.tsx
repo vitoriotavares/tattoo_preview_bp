@@ -21,25 +21,24 @@ export function UserProfile() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 p-6">
-      <div className="text-center">
-        <Avatar className="size-16 mx-auto mb-4">
-          <AvatarImage
-            src={session.user?.image || ""}
-            alt={session.user?.name || "User"}
-            referrerPolicy="no-referrer"
-          />
-          <AvatarFallback>
-            {(
-              session.user?.name?.[0] ||
-              session.user?.email?.[0] ||
-              "U"
-            ).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <h2 className="text-xl font-semibold">{session.user?.name}</h2>
-        <p className="text-muted-foreground">{session.user?.email}</p>
-      </div>
+    <div className="flex items-center gap-3">
+      <span className="text-sm text-muted-foreground">
+        Welcome {session.user?.name}
+      </span>
+      <Avatar className="size-8">
+        <AvatarImage
+          src={session.user?.image || ""}
+          alt={session.user?.name || "User"}
+          referrerPolicy="no-referrer"
+        />
+        <AvatarFallback>
+          {(
+            session.user?.name?.[0] ||
+            session.user?.email?.[0] ||
+            "U"
+          ).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
       <SignOutButton />
     </div>
   );

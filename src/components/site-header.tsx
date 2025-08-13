@@ -10,7 +10,7 @@ export function SiteHeader() {
             href="/"
             className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,color-mix(in_oklab,var(--primary)_85%,white_0%),color-mix(in_oklab,var(--primary)_50%,white_0%))] hover:opacity-90"
           >
-            Next.js Starter Kit
+            Next.js Boilerplate
           </Link>
         </h1>
         <UserProfile />

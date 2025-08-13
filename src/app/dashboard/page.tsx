@@ -3,10 +3,13 @@
 import { useSession } from "@/lib/auth-client";
 import { UserProfile } from "@/components/auth/user-profile";
 import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
+import { useDiagnostics } from "@/hooks/use-diagnostics";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession();
+  const { isAiReady, loading: diagnosticsLoading } = useDiagnostics();
 
   if (isPending) {
     return (
@@ -19,7 +22,14 @@ export default function DashboardPage() {
   if (!session) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="mb-8">
+            <Lock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h1 className="text-2xl font-bold mb-2">Protected Page</h1>
+            <p className="text-muted-foreground mb-6">
+              You need to sign in to access the dashboard
+            </p>
+          </div>
           <UserProfile />
         </div>
       </div>
@@ -38,9 +48,15 @@ export default function DashboardPage() {
           <p className="text-muted-foreground mb-4">
             Start a conversation with AI using the Vercel AI SDK
           </p>
-          <Button asChild>
-            <Link href="/chat">Go to Chat</Link>
-          </Button>
+          {(diagnosticsLoading || !isAiReady) ? (
+            <Button disabled={true}>
+              Go to Chat
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href="/chat">Go to Chat</Link>
+            </Button>
+          )}
         </div>
 
         <div className="p-6 border border-border rounded-lg">

@@ -1,18 +1,41 @@
-"use client"
+"use client";
 
-import { useChat } from "@ai-sdk/react"
-import { Button } from "@/components/ui/button"
-import { UserProfile } from "@/components/auth/user-profile"
-import { useSession } from "@/lib/auth-client"
-import { useState } from "react"
+import { useChat } from "@ai-sdk/react";
+import { Button } from "@/components/ui/button";
+import { UserProfile } from "@/components/auth/user-profile";
+import { useSession } from "@/lib/auth-client";
+import { useState, type ReactNode } from "react";
+
+type TextPart = { type?: string; text?: string };
+type MaybePartsMessage = {
+  display?: ReactNode;
+  parts?: TextPart[];
+  content?: TextPart[];
+};
+
+function renderMessageContent(message: MaybePartsMessage): ReactNode {
+  if (message.display) return message.display;
+  const parts = Array.isArray(message.parts)
+    ? message.parts
+    : Array.isArray(message.content)
+    ? message.content
+    : [];
+  return parts.map((p, idx) =>
+    p?.type === "text" && p.text ? <span key={idx}>{p.text}</span> : null
+  );
+}
 
 export default function ChatPage() {
-  const { data: session, isPending } = useSession()
-  const { messages, sendMessage, status } = useChat()
-  const [input, setInput] = useState("")
+  const { data: session, isPending } = useSession();
+  const { messages, sendMessage, status } = useChat();
+  const [input, setInput] = useState("");
 
   if (isPending) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
   if (!session) {
@@ -20,7 +43,7 @@ export default function ChatPage() {
       <div className="flex justify-center items-center h-screen">
         <UserProfile />
       </div>
-    )
+    );
   }
 
   return (
@@ -34,7 +57,7 @@ export default function ChatPage() {
           <UserProfile />
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground">
@@ -53,18 +76,18 @@ export default function ChatPage() {
             <div className="text-sm font-medium mb-1">
               {message.role === "user" ? "You" : "AI"}
             </div>
-            <div>{message.content}</div>
+            <div>{renderMessageContent(message as MaybePartsMessage)}</div>
           </div>
         ))}
       </div>
 
       <form
         onSubmit={(e) => {
-          e.preventDefault()
-          const text = input.trim()
-          if (!text) return
-          sendMessage({ text })
-          setInput("")
+          e.preventDefault();
+          const text = input.trim();
+          if (!text) return;
+          sendMessage({ role: "user", parts: [{ type: "text", text }] });
+          setInput("");
         }}
         className="flex gap-2"
       >
@@ -74,10 +97,13 @@ export default function ChatPage() {
           placeholder="Type your message..."
           className="flex-1 p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
         />
-        <Button type="submit" disabled={!input.trim() || status === "streaming"}>
+        <Button
+          type="submit"
+          disabled={!input.trim() || status === "streaming"}
+        >
           Send
         </Button>
       </form>
     </div>
-  )
+  );
 }

@@ -1,13 +1,15 @@
-import { openai } from "@ai-sdk/openai"
-import { streamText } from "ai"
+import { openai } from "@ai-sdk/openai";
+import { streamText, UIMessage, convertToModelMessages } from "ai";
 
 export async function POST(req: Request) {
-  const { messages } = await req.json()
+  const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-3.5-turbo"),
-    messages,
-  })
+    model: openai("gpt-5-mini"),
+    messages: convertToModelMessages(messages),
+  });
 
-  return result.toTextStreamResponse()
+  return (
+    result as unknown as { toUIMessageStreamResponse: () => Response }
+  ).toUIMessageStreamResponse();
 }

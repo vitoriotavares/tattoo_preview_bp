@@ -24,6 +24,7 @@ Before you begin, ensure you have the following installed on your machine:
 ### 1. Clone or Download the Repository
 
 **Option A: Clone with Git**
+
 ```bash
 git clone https://github.com/your-username/nextjs-better-auth-postgresql-starter-kit.git
 cd nextjs-better-auth-postgresql-starter-kit
@@ -41,6 +42,7 @@ npm install
 ### 3. Environment Setup
 
 Copy the example environment file:
+
 ```bash
 cp env.example .env
 ```
@@ -60,6 +62,7 @@ GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
 # AI Integration (Optional - for chat functionality)
 OPENAI_API_KEY="sk-your-openai-api-key-here"
+OPENAI_MODEL="gpt-5-mini"
 
 # App URL (for production deployments)
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
@@ -68,6 +71,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ### 4. Database Setup
 
 Push the database schema to your PostgreSQL database:
+
 ```bash
 npm run db:push
 ```
@@ -166,11 +170,13 @@ npm run db:reset     # Reset database (drop all tables)
 ### Production Environment Variables
 
 Ensure these are set in your production environment:
+
 - `DATABASE_URL` - Production PostgreSQL connection string
 - `BETTER_AUTH_SECRET` - Secure random 32+ character string
 - `GOOGLE_CLIENT_ID` - Google OAuth Client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth Client Secret
 - `OPENAI_API_KEY` - OpenAI API key (optional)
+- `OPENAI_MODEL` - OpenAI model name (optional, defaults to gpt-5-mini)
 - `NEXT_PUBLIC_APP_URL` - Your production domain
 
 ## 🎥 Tutorial Video
@@ -179,7 +185,7 @@ Watch my comprehensive tutorial on how to use this boilerplate to build amazing 
 
 [📺 YouTube Tutorial - Building with Next.js Better Auth PostgreSQL Starter Kit](#)
 
-*Coming soon - link will be updated with the actual video URL*
+_Coming soon - link will be updated with the actual video URL_
 
 ## 🤝 Contributing
 

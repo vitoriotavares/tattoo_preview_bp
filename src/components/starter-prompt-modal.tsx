@@ -59,6 +59,20 @@ The only things to preserve are:
 - shadcn/ui components
 - Lucide React icons
 
+## AI Model Configuration
+**IMPORTANT**: When implementing any AI functionality, always use the \`OPENAI_MODEL\` environment variable for the model name instead of hardcoding it:
+
+\`\`\`typescript
+// ✅ Correct - Use environment variable
+const model = process.env.OPENAI_MODEL || "gpt-5-mini";
+model: openai(model)
+
+// ❌ Incorrect - Don't hardcode model names
+model: openai("gpt-5-mini")
+\`\`\`
+
+This allows for easy model switching without code changes and ensures consistency across the application.
+
 ## Component Development Guidelines
 **Always prioritize shadcn/ui components** when building the application:
 

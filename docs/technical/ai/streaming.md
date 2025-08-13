@@ -97,7 +97,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o"),
+    model: openai(process.env.OPENAI_MODEL || "gpt-5-mini"),
     messages: convertToModelMessages(messages),
   });
 
@@ -209,7 +209,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o"),
+    model: openai(process.env.OPENAI_MODEL || "gpt-5-mini"),
     messages: convertToModelMessages(messages),
     tools: {
       weather: tool({
@@ -336,7 +336,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o"),
+    model: openai(process.env.OPENAI_MODEL || "gpt-5-mini"),
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {
@@ -390,7 +390,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o"),
+    model: openai(process.env.OPENAI_MODEL || "gpt-5-mini"),
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {

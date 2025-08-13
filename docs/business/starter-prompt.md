@@ -34,9 +34,11 @@ This is a **boilerplate/starter template** - all existing pages and components a
 
 The only things to preserve are:
 
-- Authentication system (but customize the UI/flow as needed)
-- Database setup and schema (but modify as needed)
-- Core configuration files (package.json, next.config.ts, etc.)
+- **All installed libraries and dependencies** (DO NOT uninstall or remove any packages from package.json)
+- **Authentication system** (but customize the UI/flow as needed)
+- **Database setup and schema** (but modify schema as needed for your use case)
+- **Core configuration files** (next.config.ts, tsconfig.json, tailwind.config.ts, etc.)
+- **Build and development scripts** (keep all npm/pnpm scripts in package.json)
 
 ## Tech Stack
 

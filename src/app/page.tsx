@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SetupChecklist } from "@/components/setup-checklist";
 import { useDiagnostics } from "@/hooks/use-diagnostics";
+import { StarterPromptModal } from "@/components/starter-prompt-modal";
 
 export default function Home() {
   const { isAuthReady, isAiReady, loading } = useDiagnostics();
@@ -120,10 +121,11 @@ export default function Home() {
               </div>
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">4. Start building</h4>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-3">
                   Customize the components, add your own pages, and build your
                   application on top of this solid foundation.
                 </p>
+                <StarterPromptModal />
               </div>
             </div>
           </div>

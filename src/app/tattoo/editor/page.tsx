@@ -182,7 +182,7 @@ function TattooEditorContent() {
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2">
-              <Wand2 className="h-5 w-5 text-green-500" />
+              <Wand2 className="h-5 w-5 text-primary" />
               Resultado Pronto!
             </CardTitle>
           </CardHeader>

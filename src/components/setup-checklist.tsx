@@ -32,11 +32,11 @@ type DiagnosticsResponse = {
 function StatusIcon({ ok }: { ok: boolean }) {
   return ok ? (
     <div title="ok">
-      <CheckCircle2 className="h-4 w-4 text-green-600" aria-label="ok" />
+      <CheckCircle2 className="h-4 w-4 text-primary" aria-label="ok" />
     </div>
   ) : (
     <div title="not ok">
-      <XCircle className="h-4 w-4 text-red-600" aria-label="not-ok" />
+      <XCircle className="h-4 w-4 text-destructive" aria-label="not-ok" />
     </div>
   );
 }

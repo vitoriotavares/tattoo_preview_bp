@@ -19,7 +19,7 @@ const modes = [
     title: 'Adicionar Tatuagem',
     description: 'Aplique designs de tatuagem em fotos do corpo com realismo fotográfico',
     icon: <ImagePlus className="h-6 w-6" />,
-    color: 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800',
+    color: 'bg-accent/50 border-accent',
     features: [
       'Qualidade fotorrealista',
       'Ajuste automático de perspectiva',
@@ -32,7 +32,7 @@ const modes = [
     title: 'Remover Tatuagem',
     description: 'Remova digitalmente tatuagens existentes reconstruindo a pele natural',
     icon: <Eraser className="h-6 w-6" />,
-    color: 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800',
+    color: 'bg-secondary/50 border-secondary',
     features: [
       'Reconstrução realista da pele',
       'Preservação de marcas naturais',
@@ -45,7 +45,7 @@ const modes = [
     title: 'Retocar Tatuagem',
     description: 'Melhore a qualidade, cores e nitidez de tatuagens existentes',
     icon: <Sparkles className="h-6 w-6" />,
-    color: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
+    color: 'bg-muted/50 border-muted-foreground/20',
     features: [
       'Aumento da saturação',
       'Definição de contornos',

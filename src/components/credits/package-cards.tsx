@@ -15,10 +15,10 @@ const packageIcons = {
 };
 
 const packageColors = {
-  Starter: "bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800",
-  Popular: "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800 ring-2 ring-green-200 dark:ring-green-800",
-  Pro: "bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800",
-  Studio: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800",
+  Starter: "bg-muted/50 border-muted-foreground/20",
+  Popular: "bg-primary/5 border-primary ring-2 ring-primary/20",
+  Pro: "bg-muted/50 border-muted-foreground/20",
+  Studio: "bg-muted/50 border-muted-foreground/20",
 };
 
 export function PackageCards() {
@@ -76,7 +76,7 @@ export function PackageCards() {
             }`}
           >
             {pkg.name === "Popular" && (
-              <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 hover:bg-green-500">
+              <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary hover:bg-primary">
                 <Sparkles className="h-3 w-3 mr-1" />
                 Mais Popular
               </Badge>

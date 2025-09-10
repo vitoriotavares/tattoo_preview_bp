@@ -78,10 +78,10 @@ function PaymentSuccessContent() {
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <Card className="text-center">
           <CardHeader>
-            <div className="mx-auto mb-4 p-3 rounded-full bg-green-100 dark:bg-green-900/20 w-fit">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-4 p-3 rounded-full bg-primary/10 w-fit">
+              <CheckCircle2 className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl text-green-600 dark:text-green-400">
+            <CardTitle className="text-2xl text-primary">
               Pagamento Realizado com Sucesso!
             </CardTitle>
           </CardHeader>
@@ -98,14 +98,14 @@ function PaymentSuccessContent() {
                   <span>Atualizando seus créditos...</span>
                 </div>
               ) : credits && (
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary">
                   <div className="flex items-center justify-center gap-2">
-                    <Zap className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    <span className="font-semibold text-green-800 dark:text-green-200">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <span className="font-semibold text-primary">
                       {credits.availableCredits} créditos disponíveis
                     </span>
                   </div>
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Total: {credits.totalCredits} | Usados: {credits.usedCredits}
                   </p>
                 </div>

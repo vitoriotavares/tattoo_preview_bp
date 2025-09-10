@@ -1,19 +1,28 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Oswald, Merriweather, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const oswald = Oswald({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const merriweather = Merriweather({
+  variable: "--font-serif",
   subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${oswald.variable} ${merriweather.variable} ${firaCode.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

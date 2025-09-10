@@ -21,7 +21,7 @@ export function CreditCounter() {
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-1.5">
-        <Coins className="h-4 w-4 text-yellow-500" />
+        <Coins className="h-4 w-4 text-primary" />
         <Badge 
           variant={hasCredits ? "default" : "destructive"}
           className="font-mono text-xs"

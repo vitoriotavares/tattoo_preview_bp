@@ -150,11 +150,11 @@ export default function LandingPage() {
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-destructive rounded-full"></div>
                       <span className="text-muted-foreground">Antes: {example.before}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
                       <span className="text-muted-foreground">Depois: {example.after}</span>
                     </div>
                   </div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {benefits.map((benefit, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
                   <span className="text-sm">{benefit}</span>
                 </div>
               ))}

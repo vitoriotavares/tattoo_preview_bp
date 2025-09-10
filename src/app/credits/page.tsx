@@ -36,7 +36,7 @@ export default function CreditsPage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Coins className="h-5 w-5 text-yellow-500" />
+              <Coins className="h-5 w-5 text-primary" />
               Seus Créditos Atuais
             </CardTitle>
           </CardHeader>
@@ -74,7 +74,7 @@ export default function CreditsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4 text-center">
-            <Zap className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+            <Zap className="h-8 w-8 mx-auto mb-2 text-primary" />
             <h3 className="font-semibold text-sm">Processamento Rápido</h3>
             <p className="text-xs text-muted-foreground">Resultados em 10s</p>
           </CardContent>
@@ -82,7 +82,7 @@ export default function CreditsPage() {
         
         <Card>
           <CardContent className="p-4 text-center">
-            <Shield className="h-8 w-8 mx-auto mb-2 text-green-500" />
+            <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
             <h3 className="font-semibold text-sm">Qualidade Garantida</h3>
             <p className="text-xs text-muted-foreground">IA de última geração</p>
           </CardContent>
@@ -90,7 +90,7 @@ export default function CreditsPage() {
         
         <Card>
           <CardContent className="p-4 text-center">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+            <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
             <h3 className="font-semibold text-sm">Sem Expiração</h3>
             <p className="text-xs text-muted-foreground">Use quando quiser</p>
           </CardContent>
@@ -98,7 +98,7 @@ export default function CreditsPage() {
         
         <Card>
           <CardContent className="p-4 text-center">
-            <Coins className="h-8 w-8 mx-auto mb-2 text-purple-500" />
+            <Coins className="h-8 w-8 mx-auto mb-2 text-primary" />
             <h3 className="font-semibold text-sm">Melhor Custo</h3>
             <p className="text-xs text-muted-foreground">Pacotes econômicos</p>
           </CardContent>

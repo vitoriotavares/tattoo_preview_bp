@@ -45,10 +45,10 @@ function wait(ms: number): Promise<void> {
 }
 
 // Parse retry delay from error response
-function parseRetryDelay(error: any): number {
+function parseRetryDelay(error: Error): number {
   try {
     const errorData = JSON.parse(error.message);
-    const retryInfo = errorData.error?.details?.find((detail: any) => 
+    const retryInfo = errorData.error?.details?.find((detail: { '@type': string }) => 
       detail['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
     );
     if (retryInfo?.retryDelay) {
@@ -67,7 +67,7 @@ export async function processImageWithGemini(
   config: GeminiConfig = defaultConfig,
   maxRetries: number = 2
 ): Promise<ImageProcessingResult> {
-  let lastError: any;
+  let lastError: Error;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -122,13 +122,14 @@ export async function processImageWithGemini(
         textResponse: textResponse || undefined,
       };
 
-    } catch (error: any) {
-      lastError = error;
+    } catch (error: unknown) {
+      lastError = error as Error;
       console.error(`Gemini API Error (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
       
       // Check if it's a rate limit error
-      if (error.status === 429 || error.code === 429) {
-        const retryDelay = parseRetryDelay(error);
+      const errorObj = error as { status?: number; code?: number };
+      if (errorObj.status === 429 || errorObj.code === 429) {
+        const retryDelay = parseRetryDelay(lastError);
         
         if (attempt < maxRetries) {
           console.log(`Rate limited. Waiting ${retryDelay} seconds before retry...`);

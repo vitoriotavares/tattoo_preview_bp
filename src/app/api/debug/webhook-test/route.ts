@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CreditsService } from '@/lib/services/credits-service';
+import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     console.log('=== DEBUG WEBHOOK TEST: Simulating payment processing ===');
     console.log('Mock session:', mockSession);
 
-    const success = await CreditsService.handleStripePaymentSuccess(mockSession as any);
+    const success = await CreditsService.handleStripePaymentSuccess(mockSession as Stripe.Checkout.Session);
 
     if (!success) {
       return NextResponse.json(

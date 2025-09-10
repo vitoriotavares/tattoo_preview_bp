@@ -94,7 +94,7 @@ export class CreditsService {
     }
 
     // Update credits
-    let updateData: any = {
+    const updateData: Record<string, unknown> = {
       usedCredits: credits.usedCredits + 1,
       updatedAt: new Date(),
     };

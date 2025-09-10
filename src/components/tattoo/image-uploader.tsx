@@ -35,15 +35,15 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: { file: File; errors: { code: string; message: string }[] }[]) => {
     setError(null);
     setIsDragActive(false);
 
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0];
-      if (rejection.errors.some((e: any) => e.code === 'file-too-large')) {
+      if (rejection.errors.some((e) => e.code === 'file-too-large')) {
         setError(`Arquivo muito grande. Máximo permitido: ${maxSize}MB`);
-      } else if (rejection.errors.some((e: any) => e.code === 'file-invalid-type')) {
+      } else if (rejection.errors.some((e) => e.code === 'file-invalid-type')) {
         setError(`Formato não suportado. Use: ${accept.map(type => type.split('/')[1]).join(', ')}`);
       } else {
         setError('Erro no upload do arquivo');

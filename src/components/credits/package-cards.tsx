@@ -4,7 +4,7 @@ import { useCredits } from "@/hooks/use-credits";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Star, Zap, Crown, Sparkles } from "lucide-react";
+import { Coins, Star, Zap, Crown, Sparkles, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const packageIcons = {
@@ -111,10 +111,10 @@ export function PackageCards() {
                 variant={pkg.name === "Popular" ? "default" : "outline"}
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processando...
-                  </div>
+                  </>
                 ) : (
                   "Comprar Agora"
                 )}

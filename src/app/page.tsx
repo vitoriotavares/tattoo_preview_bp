@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ImagePlus, Eraser, Sparkles, Play, Star, Zap, Shield, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Modal, ModalTrigger, ModalBody, ModalContent } from "@/components/ui/animated-modal";
 
 export default function LandingPage() {
   const features = [
@@ -87,10 +88,55 @@ export default function LandingPage() {
               </Link>
             </Button>
             
-            <Button variant="outline" size="lg" className="min-w-[200px]">
-              <Play className="mr-2 h-4 w-4" />
-              Ver Demonstração
-            </Button>
+            <Modal>
+              <ModalTrigger className="min-w-[200px] px-6 py-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm font-medium flex items-center justify-center">
+                <Play className="mr-2 h-4 w-4" />
+                Ver Demonstração
+              </ModalTrigger>
+              <ModalBody>
+                <ModalContent>
+                  <h2 className="text-2xl font-bold mb-6">Demonstração TattooPreview</h2>
+                  
+                  <div className="space-y-6">
+                    <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <Play className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Video demonstrativo em breve</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                          <ImagePlus className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                          <h4 className="font-semibold text-sm">Adicionar</h4>
+                          <p className="text-xs text-muted-foreground">Aplique tatuagens realistas</p>
+                        </div>
+                        <div className="text-center p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                          <Eraser className="h-8 w-8 mx-auto mb-2 text-red-600" />
+                          <h4 className="font-semibold text-sm">Remover</h4>
+                          <p className="text-xs text-muted-foreground">Remova com reconstrução natural</p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                          <Sparkles className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                          <h4 className="font-semibold text-sm">Retocar</h4>
+                          <p className="text-xs text-muted-foreground">Melhore cores e qualidade</p>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4">
+                        <Button asChild className="w-full">
+                          <Link href="/tattoo">
+                            Experimentar Agora Grátis
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </ModalContent>
+              </ModalBody>
+            </Modal>
           </div>
 
           <p className="text-sm text-muted-foreground">

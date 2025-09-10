@@ -1,94 +1,166 @@
-I'm working with an agentic coding boilerplate project that includes authentication, database integration, and AI capabilities. Here's what's already set up:
+Vou refinar e estruturar melhor esse prompt para o aplicativo TattooPreview:
 
-## Current Agentic Coding Boilerplate Structure
+## 📱 **TattooPreview - Especificação Técnica**
 
-- **Authentication**: Better Auth with Google OAuth integration
-- **Database**: Drizzle ORM with PostgreSQL setup
-- **AI Integration**: Vercel AI SDK with OpenAI integration
-- **UI**: shadcn/ui components with Tailwind CSS
-- **Current Routes**:
-  - `/` - Home page with setup instructions and feature overview
-  - `/dashboard` - Protected dashboard page (requires authentication)
-  - `/chat` - AI chat interface (requires OpenAI API key)
+### **Visão Geral**
+Aplicativo web de visualização e edição de tatuagens usando IA, permitindo aos usuários experimentar virtualmente tatuagens em seus corpos através de processamento avançado de imagens.
 
-## Important Context
+### **Funcionalidades Principais**
 
-This is an **agentic coding boilerplate/starter template** - all existing pages and components are meant to be examples and should be **completely replaced** to build the actual AI-powered application.
+#### 1. **Modos de Operação**
+- **Adicionar Tatuagem**: 
+  - Upload de foto do corpo + imagem de referência da tatuagem
+  - Extração inteligente da tatuagem da imagem de referência
+  - Posicionamento e ajuste automático no corpo do usuário
+  
+- **Remover Tatuagem**: 
+  - Upload de foto com tatuagem existente
+  - Remoção realista com reconstrução da pele
+  
+- **Retocar Tatuagem**: 
+  - Upload de foto com tatuagem existente
+  - Ajustes de cor, nitidez, contraste e definição
 
-### CRITICAL: You MUST Override All Boilerplate Content
+#### 2. **Sistema de Autenticação**
+- Login via Google OAuth 2.0
+- Usuários novos recebem 3 créditos gratuitos
+- Perfil simplificado com contador de créditos
 
-**DO NOT keep any boilerplate components, text, or UI elements unless explicitly requested.** This includes:
+#### 3. **Sistema de Créditos**
+- 1 crédito = 1 processamento de imagem
+- Pacotes de créditos disponíveis para compra
+- Integração com gateway de pagamento (Stripe/MercadoPago)
 
-- **Remove all placeholder/demo content** (setup checklists, welcome messages, boilerplate text)
-- **Replace the entire navigation structure** - don't keep the existing site header or nav items
-- **Override all page content completely** - don't append to existing pages, replace them entirely
-- **Remove or replace all example components** (setup-checklist, starter-prompt-modal, etc.)
-- **Replace placeholder routes and pages** with the actual application functionality
+### **Arquitetura Técnica**
 
-### Required Actions:
-
-1. **Start Fresh**: Treat existing components as temporary scaffolding to be removed
-2. **Complete Replacement**: Build the new application from scratch using the existing tech stack
-3. **No Hybrid Approach**: Don't try to integrate new features alongside existing boilerplate content
-4. **Clean Slate**: The final application should have NO trace of the original boilerplate UI or content
-
-The only things to preserve are:
-
-- **All installed libraries and dependencies** (DO NOT uninstall or remove any packages from package.json)
-- **Authentication system** (but customize the UI/flow as needed)
-- **Database setup and schema** (but modify schema as needed for your use case)
-- **Core configuration files** (next.config.ts, tsconfig.json, tailwind.config.ts, etc.)
-- **Build and development scripts** (keep all npm/pnpm scripts in package.json)
-
-## Tech Stack
-
-- Next.js 15 with App Router
+#### **Stack Tecnológico**
+```
+Frontend:
+- Next.js 14+ (App Router)
 - TypeScript
 - Tailwind CSS
-- Better Auth for authentication
-- Drizzle ORM + PostgreSQL
-- Vercel AI SDK
-- shadcn/ui components
-- Lucide React icons
+- Shadcn/ui
+- React Query
 
-## Component Development Guidelines
+Backend:
+- Next.js API Routes
+- Prisma ORM
+- PostgreSQL (Supabase)
+- NextAuth.js
 
-**Always prioritize shadcn/ui components** when building the application:
+IA/Processamento:
+- Google Gemini API (Imagen/Edit)
+- Sharp (pré-processamento)
+- Canvas API (ajustes finos)
 
-1. **First Choice**: Use existing shadcn/ui components from the project
-2. **Second Choice**: Install additional shadcn/ui components using `pnpm dlx shadcn@latest add <component-name>`
-3. **Last Resort**: Only create custom components or use other libraries if shadcn/ui doesn't provide a suitable option
+Infraestrutura:
+- Vercel (deployment)
+- Cloudinary (CDN temporário)
+- Stripe/MercadoPago (pagamentos)
+```
 
-The project already includes several shadcn/ui components (button, dialog, avatar, etc.) and follows their design system. Always check the [shadcn/ui documentation](https://ui.shadcn.com/docs/components) for available components before implementing alternatives.
+### **Fluxo de Usuário Detalhado**
 
-## What I Want to Build
+1. **Landing Page**
+   - Hero section com demonstração ao vivo
+   - CTA para login/registro
+   - Galeria de exemplos
 
-Basic todo list app with the ability for users to add, remove, update, complete and view todos.
+2. **Dashboard Principal**
+   - Seletor de modo (Adicionar/Remover/Retocar)
+   - Upload de imagens com drag-and-drop
+   - Preview em tempo real
+   - Contador de créditos visível
 
-## Request
+3. **Editor de Tatuagem**
+   - Controles de ajuste (tamanho, rotação, opacidade)
+   - Seletor de parte do corpo
+   - Preview antes/depois
+   - Botão de processar
 
-Please help me transform this boilerplate into my actual application. **You MUST completely replace all existing boilerplate code** to match my project requirements. The current implementation is just temporary scaffolding that should be entirely removed and replaced.
+4. **Resultado**
+   - Imagem processada em alta resolução
+   - Opções: Download, Novo Design, Compartilhar
+   - Sugestão de compra de créditos (se esgotados)
 
-## Final Reminder: COMPLETE REPLACEMENT REQUIRED
+### **Prompts de IA Especializados**
 
-🚨 **IMPORTANT**: Do not preserve any of the existing boilerplate UI, components, or content. The user expects a completely fresh application that implements their requirements from scratch. Any remnants of the original boilerplate (like setup checklists, welcome screens, demo content, or placeholder navigation) indicate incomplete implementation.
+#### **Para Adicionar Tatuagem:**
+```
+"Apply this tattoo design to the person's body with photorealistic quality. 
+Considerations:
+- Natural skin texture and lighting
+- Proper perspective and body contours
+- Realistic ink saturation and aging
+- Shadow and highlight integration
+- Skin tone matching
+Position: [specified_body_part]
+Style preservation: maintain original tattoo artistic style"
+```
 
-**Success Criteria**: The final application should look and function as if it was built from scratch for the specific use case, with no evidence of the original boilerplate template.
+#### **Para Remover Tatuagem:**
+```
+"Remove the tattoo from this image while preserving natural skin appearance.
+Requirements:
+- Reconstruct underlying skin texture
+- Match surrounding skin tone and patterns
+- Preserve natural body marks (moles, freckles)
+- Maintain consistent lighting
+- No visible artifacts or blur"
+```
 
-## Post-Implementation Documentation
+#### **Para Retocar Tatuagem:**
+```
+"Enhance and restore this existing tattoo.
+Adjustments needed:
+- Sharpen line work
+- Restore color vibrancy
+- Fix fading or blur
+- Enhance contrast
+- Preserve original design intent
+- Professional tattoo photography quality"
+```
 
-After completing the implementation, you MUST document any new features or significant changes in the `/docs/features/` directory:
+### **Considerações de UX/UI**
 
-1. **Create Feature Documentation**: For each major feature implemented, create a markdown file in `/docs/features/` that explains:
+- **Design minimalista** com foco na imagem
+- **Onboarding** rápido (3 passos máximo)
+- **Feedback visual** durante processamento
+- **Responsivo** mobile-first
+- **Dark mode** por padrão
+- **Tutoriais** em tooltip contextual
 
-   - What the feature does
-   - How it works
-   - Key components and files involved
-   - Usage examples
-   - Any configuration or setup required
+### **Modelo de Monetização**
 
-2. **Update Existing Documentation**: If you modify existing functionality, update the relevant documentation files to reflect the changes.
+```
+Pacotes de Créditos:
+- Starter: 5 créditos - R$ 9,90
+- Popular: 15 créditos - R$ 24,90
+- Pro: 40 créditos - R$ 49,90
+- Studio: 100 créditos - R$ 99,90
+```
 
-3. **Document Design Decisions**: Include any important architectural or design decisions made during implementation.
+**Melhorias**
+- Editor avançado de posicionamento
+- Múltiplos estilos de processamento
+- Gateway de pagamento
+- Analytics básico
 
-This documentation helps maintain the project and assists future developers working with the codebase.
+**Expansão**
+- Galeria de usuários (opcional)
+- Biblioteca de designs
+- API para parceiros
+- App mobile nativo
+
+### **Métricas de Sucesso**
+- Taxa de conversão free-to-paid > 15%
+- Retenção D7 > 40%
+- NPS > 8
+- Tempo médio de processamento < 10s
+
+### **Compliance e Segurança**
+- LGPD/GDPR compliance
+- Termos de uso claros sobre direitos de imagem
+- Processamento server-side (sem exposição de API keys)
+- Rate limiting por usuário
+- Validação de conteúdo (NSFW filter)

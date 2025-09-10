@@ -1,15 +1,17 @@
-# Agentic Coding Boilerplate
+# 🎨 **TattooPreview** - AI-Powered Tattoo Visualization
 
-A complete agentic coding boilerplate with authentication, PostgreSQL database, AI chat functionality, and modern UI components - perfect for building AI-powered applications and autonomous agents.
+> Experimente tatuagens virtualmente com qualidade fotorrealista usando Google Gemini 2.5 Flash Image Preview
 
-## 🚀 Features
+TattooPreview é uma aplicação web que permite aos usuários visualizar como tatuagens ficariam em seus corpos usando IA avançada, oferecendo uma experiência realista antes de tomar a decisão de tatuar.
 
-- **🔐 Authentication**: Better Auth with Google OAuth integration
-- **🗃️ Database**: Drizzle ORM with PostgreSQL
-- **🤖 AI Integration**: Vercel AI SDK with OpenAI support
-- **🎨 UI Components**: shadcn/ui with Tailwind CSS
-- **⚡ Modern Stack**: Next.js 15, React 19, TypeScript
-- **📱 Responsive**: Mobile-first design approach
+## 🚀 Funcionalidades Principais
+
+- 🎯 **Adicionar Tatuagem**: Aplique designs de tatuagem em fotos do corpo com realismo fotográfico
+- 🔄 **Remover Tatuagem**: Remova digitalmente tatuagens existentes reconstruindo a pele natural  
+- ✨ **Retocar Tatuagem**: Melhore a qualidade, cores e nitidez de tatuagens existentes
+- 💳 **Sistema de Créditos**: Monetização com 3 créditos grátis + pacotes pagos
+- 🔐 **Autenticação Google**: Login seguro via Google OAuth
+- 📱 **Mobile First**: Interface responsiva otimizada para dispositivos móveis
 
 ## 🎥 Video Tutorial
 

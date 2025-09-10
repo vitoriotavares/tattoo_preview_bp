@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ interface UploadedImage {
   preview: string;
 }
 
-export default function TattooEditorPage() {
+function TattooEditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const mode = (searchParams.get('mode') as TattooMode) || 'add';
@@ -148,191 +148,208 @@ export default function TattooEditorPage() {
   };
 
   return (
-    <AuthGuard>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/tattoo">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/tattoo">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">{config.title}</h1>
+          <p className="text-muted-foreground">{config.description}</p>
+        </div>
+      </div>
+
+      {/* Credits Status */}
+      <div className="flex items-center justify-center gap-4 mb-8">
+        <Badge variant={hasCredits ? "default" : "destructive"}>
+          {creditsLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
+        </Badge>
+        
+        {!hasCredits && !creditsLoading && (
+          <Button asChild size="sm">
+            <Link href="/credits">
+              Comprar Créditos
             </Link>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{config.title}</h1>
-            <p className="text-muted-foreground">{config.description}</p>
-          </div>
-        </div>
+        )}
+      </div>
 
-        {/* Credits Status */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <Badge variant={hasCredits ? "default" : "destructive"}>
-            {creditsLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
-          </Badge>
-          
-          {!hasCredits && !creditsLoading && (
-            <Button asChild size="sm">
-              <Link href="/credits">
-                Comprar Créditos
-              </Link>
-            </Button>
-          )}
-        </div>
-
-        {result ? (
-          // Result View
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center gap-2">
-                <Wand2 className="h-5 w-5 text-green-500" />
-                Resultado Pronto!
-              </CardTitle>
+      {result ? (
+        // Result View
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Wand2 className="h-5 w-5 text-green-500" />
+              Resultado Pronto!
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="relative rounded-lg overflow-hidden border bg-muted">
+              <img
+                src={result}
+                alt="Resultado processado"
+                className="w-full h-auto max-h-96 object-contain"
+              />
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={handleDownload} className="flex-1 sm:flex-initial">
+                <Download className="h-4 w-4 mr-2" />
+                Baixar Resultado
+              </Button>
+              <Button variant="outline" onClick={handleNewEdit} className="flex-1 sm:flex-initial">
+                Nova Edição
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        // Editor View
+        <div className="space-y-8">
+          {/* Upload Section */}
+          <Card className={config.color}>
+            <CardHeader>
+              <CardTitle>Upload de Imagens</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="relative rounded-lg overflow-hidden border bg-muted">
-                <img
-                  src={result}
-                  alt="Resultado processado"
-                  className="w-full h-auto max-h-96 object-contain"
-                />
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={handleDownload} className="flex-1 sm:flex-initial">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar Resultado
-                </Button>
-                <Button variant="outline" onClick={handleNewEdit} className="flex-1 sm:flex-initial">
-                  Nova Edição
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          // Editor View
-          <div className="space-y-8">
-            {/* Upload Section */}
-            <Card className={config.color}>
-              <CardHeader>
-                <CardTitle>Upload de Imagens</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="body" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="body">
-                      Foto do Corpo
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="tattoo" 
-                      disabled={!config.needsTattooImage}
-                    >
-                      {config.needsTattooImage ? "Tatuagem" : "Não Necessário"}
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="body" className="mt-4">
+            <CardContent>
+              <Tabs defaultValue="body" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="body">
+                    Foto do Corpo
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="tattoo" 
+                    disabled={!config.needsTattooImage}
+                  >
+                    {config.needsTattooImage ? "Tatuagem" : "Não Necessário"}
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="body" className="mt-4">
+                  <ImageUploader
+                    label="Foto do Corpo"
+                    description={
+                      mode === 'add' 
+                        ? "Faça upload da foto onde deseja aplicar a tatuagem"
+                        : "Faça upload da foto com a tatuagem existente"
+                    }
+                    onImageSelect={handleBodyImageSelect}
+                    onImageRemove={handleBodyImageRemove}
+                    currentImage={bodyImage?.preview}
+                    required
+                  />
+                </TabsContent>
+                
+                {config.needsTattooImage && (
+                  <TabsContent value="tattoo" className="mt-4">
                     <ImageUploader
-                      label="Foto do Corpo"
-                      description={
-                        mode === 'add' 
-                          ? "Faça upload da foto onde deseja aplicar a tatuagem"
-                          : "Faça upload da foto com a tatuagem existente"
-                      }
-                      onImageSelect={handleBodyImageSelect}
-                      onImageRemove={handleBodyImageRemove}
-                      currentImage={bodyImage?.preview}
+                      label="Design da Tatuagem"
+                      description="Faça upload do design que deseja aplicar na foto do corpo"
+                      onImageSelect={handleTattooImageSelect}
+                      onImageRemove={handleTattooImageRemove}
+                      currentImage={tattooImage?.preview}
                       required
                     />
                   </TabsContent>
-                  
-                  {config.needsTattooImage && (
-                    <TabsContent value="tattoo" className="mt-4">
-                      <ImageUploader
-                        label="Design da Tatuagem"
-                        description="Faça upload do design que deseja aplicar na foto do corpo"
-                        onImageSelect={handleTattooImageSelect}
-                        onImageRemove={handleTattooImageRemove}
-                        currentImage={tattooImage?.preview}
-                        required
-                      />
-                    </TabsContent>
+                )}
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Error Display */}
+          {processingError && (
+            <Card className="border-destructive bg-destructive/10">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-destructive mb-1">Erro no Processamento</h4>
+                    <p className="text-sm text-destructive/80">
+                      {processingError}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Process Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-5 w-5" />
+                Processar com IA
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-6">
+                  Utilizamos o Google Gemini 2.5 Flash Image Preview para resultados fotorrealistas
+                </p>
+                
+                <Button 
+                  size="lg" 
+                  onClick={handleProcess}
+                  disabled={!canProcess()}
+                  className="min-w-[200px]"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : !hasCredits ? (
+                    "Sem Créditos"
+                  ) : !bodyImage ? (
+                    "Adicione Foto do Corpo"
+                  ) : config.needsTattooImage && !tattooImage ? (
+                    "Adicione Design da Tatuagem"
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      Processar Imagem (1 crédito)
+                    </>
                   )}
-                </Tabs>
-              </CardContent>
-            </Card>
+                </Button>
+              </div>
 
-            {/* Error Display */}
-            {processingError && (
-              <Card className="border-destructive bg-destructive/10">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-destructive mb-1">Erro no Processamento</h4>
-                      <p className="text-sm text-destructive/80">
-                        {processingError}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              <Separator />
 
-            {/* Process Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="h-5 w-5" />
-                  Processar com IA
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <p className="text-muted-foreground mb-6">
-                    Utilizamos o Google Gemini 2.5 Flash Image Preview para resultados fotorrealistas
-                  </p>
-                  
-                  <Button 
-                    size="lg" 
-                    onClick={handleProcess}
-                    disabled={!canProcess()}
-                    className="min-w-[200px]"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Processando...
-                      </>
-                    ) : !hasCredits ? (
-                      "Sem Créditos"
-                    ) : !bodyImage ? (
-                      "Adicione Foto do Corpo"
-                    ) : config.needsTattooImage && !tattooImage ? (
-                      "Adicione Design da Tatuagem"
-                    ) : (
-                      <>
-                        <Wand2 className="h-4 w-4 mr-2" />
-                        Processar Imagem (1 crédito)
-                      </>
-                    )}
-                  </Button>
+              <div className="text-center space-y-2">
+                <h4 className="font-medium text-sm">Informações do Processamento</h4>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• Tempo estimado: 5-10 segundos</p>
+                  <p>• Qualidade: Fotorrealista com IA avançada</p>
+                  <p>• Custo: 1 crédito por processamento</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
 
-                <Separator />
-
-                <div className="text-center space-y-2">
-                  <h4 className="font-medium text-sm">Informações do Processamento</h4>
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p>• Tempo estimado: 5-10 segundos</p>
-                    <p>• Qualidade: Fotorrealista com IA avançada</p>
-                    <p>• Custo: 1 crédito por processamento</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
+export default function TattooEditorPage() {
+  return (
+    <AuthGuard>
+      <Suspense fallback={
+        <div className="container mx-auto px-4 py-16 max-w-6xl">
+          <Card className="text-center">
+            <CardContent className="p-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Carregando editor...</p>
+            </CardContent>
+          </Card>
+        </div>
+      }>
+        <TattooEditorContent />
+      </Suspense>
     </AuthGuard>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, FileRejection } from "react-dropzone";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,7 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: { file: File; errors: { code: string; message: string }[] }[]) => {
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
     setError(null);
     setIsDragActive(false);
 

@@ -67,7 +67,7 @@ export async function processImageWithGemini(
   config: GeminiConfig = defaultConfig,
   maxRetries: number = 2
 ): Promise<ImageProcessingResult> {
-  let lastError: Error;
+  let lastError: Error = new Error('No error occurred');
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useCredits } from "@/hooks/use-credits";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import Link from "next/link";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { refreshCredits, credits, isLoading } = useCredits();
@@ -140,5 +140,24 @@ export default function PaymentSuccessPage() {
         </Card>
       </div>
     </AuthGuard>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <AuthGuard>
+        <div className="container mx-auto px-4 py-16 max-w-2xl">
+          <Card className="text-center">
+            <CardContent className="p-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Carregando informações do pagamento...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </AuthGuard>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

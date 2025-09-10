@@ -9,9 +9,10 @@ TattooPreview é uma aplicação web que permite aos usuários visualizar como t
 - 🎯 **Adicionar Tatuagem**: Aplique designs de tatuagem em fotos do corpo com realismo fotográfico
 - 🔄 **Remover Tatuagem**: Remova digitalmente tatuagens existentes reconstruindo a pele natural  
 - ✨ **Retocar Tatuagem**: Melhore a qualidade, cores e nitidez de tatuagens existentes
-- 💳 **Sistema de Créditos**: Monetização com 3 créditos grátis + pacotes pagos
-- 🔐 **Autenticação Google**: Login seguro via Google OAuth
+- 💳 **Sistema de Créditos**: Monetização com 3 créditos grátis + pacotes pagos via Stripe
+- 🔐 **Autenticação Google**: Login seguro via Google OAuth com Better Auth
 - 📱 **Mobile First**: Interface responsiva otimizada para dispositivos móveis
+- 🤖 **Google Gemini AI**: Powered by Gemini 2.5 Flash Image Preview (nano-banana)
 
 ## 🎥 Video Tutorial
 
@@ -174,36 +175,85 @@ npm run db:reset     # Reset database (drop all tables)
 - **Dashboard (`/dashboard`)**: Protected user dashboard with profile information
 - **Chat (`/chat`)**: AI-powered chat interface using OpenAI (requires authentication)
 
-## 🚀 Deployment
+## 🚀 Deploy na Vercel
 
-### Deploy to Vercel (Recommended)
+### 1. Preparar Repositório
 
-1. Install the Vercel CLI globally:
+```bash
+git add .
+git commit -m "prepare for vercel deployment"
+git push origin master
+```
 
-   ```bash
-   npm install -g vercel
-   ```
+### 2. Deploy to Vercel (Recommended)
 
-2. Deploy your application:
+1. **Conectar no Vercel**: Importe o projeto do GitHub na Vercel
+2. **Configure Environment Variables**:
 
-   ```bash
-   vercel --prod
-   ```
+```env
+# Database
+POSTGRES_URL=postgresql://username:password@host:5432/database?sslmode=require
 
-3. Follow the prompts to configure your deployment
-4. Add your environment variables when prompted or via the Vercel dashboard
+# Authentication - Better Auth
+BETTER_AUTH_SECRET=your-secure-random-32-character-secret
 
-### Production Environment Variables
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-Ensure these are set in your production environment:
+# Google Gemini AI
+GEMINI_API_KEY=your-gemini-api-key
 
-- `POSTGRES_URL` - Production PostgreSQL connection string
-- `BETTER_AUTH_SECRET` - Secure random 32+ character string
-- `GOOGLE_CLIENT_ID` - Google OAuth Client ID
-- `GOOGLE_CLIENT_SECRET` - Google OAuth Client Secret
-- `OPENAI_API_KEY` - OpenAI API key (optional)
-- `OPENAI_MODEL` - OpenAI model name (optional, defaults to gpt-5-mini)
-- `NEXT_PUBLIC_APP_URL` - Your production domain
+# Stripe Payment Integration
+STRIPE_SECRET_KEY=sk_live_your-stripe-secret-key
+STRIPE_PUBLISHABLE_KEY=pk_live_your-stripe-publishable-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your-stripe-publishable-key
+
+# App URL
+NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+```
+
+### 3. Configurar Webhook do Stripe
+
+**IMPORTANTE**: Após o deploy, configure o webhook no Stripe Dashboard:
+
+1. **Acesse**: [Stripe Dashboard > Developers > Webhooks](https://dashboard.stripe.com/webhooks)
+2. **Clique**: "Add endpoint"
+3. **Configure**:
+   - **URL**: `https://your-domain.vercel.app/api/stripe/webhook`
+   - **Events**: Selecione `checkout.session.completed`
+   - **Description**: "TattooPreview - Credits Purchase"
+4. **Copy signing secret** e adicione como `STRIPE_WEBHOOK_SECRET` na Vercel
+
+### 4. Inicializar Sistema
+
+Após o primeiro deploy, acesse:
+- `https://your-domain.vercel.app/api/stripe/setup` - Criar produtos no Stripe
+
+### 5. Teste o Sistema
+
+1. **Faça login** com sua conta Google
+2. **Compre créditos** usando um cartão de teste do Stripe
+3. **Verifique** se os créditos são adicionados corretamente após o pagamento
+
+## 💳 Sistema de Créditos
+
+- **Gratuitos**: 3 créditos por usuário novo
+- **Pacotes Pagos**:
+  - Starter: 5 créditos - $9.90
+  - Popular: 15 créditos - $24.90  
+  - Pro: 40 créditos - $49.90
+  - Studio: 100 créditos - $99.90
+
+## 🔧 API Routes
+
+- `POST /api/stripe/checkout` - Criar sessão de pagamento
+- `POST /api/stripe/webhook` - Webhook do Stripe (produção)
+- `POST /api/stripe/setup` - Inicializar produtos no Stripe
+- `POST /api/tattoo/process` - Processar imagem com IA
+- `GET /api/credits` - Obter créditos do usuário
+- `GET /api/debug/session` - Debug de sessão (desenvolvimento)
 
 ## 🎥 Tutorial Video
 

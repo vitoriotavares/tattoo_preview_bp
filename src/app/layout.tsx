@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { QueryProvider } from "@/providers/query-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -16,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agentic Coding Boilerplate",
+  title: "TattooPreview - AI Tattoo Visualization",
   description:
-    "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling - perfect for building AI-powered applications and autonomous agents by Leon van Zyl",
+    "Experimente tatuagens virtualmente com qualidade fotorrealista usando Google Gemini 2.5 Flash Image Preview. Adicione, remova ou retoque tatuagens com IA avançada.",
 };
 
 export default function RootLayout({
@@ -33,13 +34,15 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <SiteHeader />
-          {children}
-          <SiteFooter />
+          <QueryProvider>
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

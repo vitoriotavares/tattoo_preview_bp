@@ -2,173 +2,219 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SetupChecklist } from "@/components/setup-checklist";
-import { useDiagnostics } from "@/hooks/use-diagnostics";
-import { StarterPromptModal } from "@/components/starter-prompt-modal";
-import { Video, Shield, Database, Palette, Bot } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ImagePlus, Eraser, Sparkles, Play, Star, Zap, Shield, ArrowRight, CheckCircle2 } from "lucide-react";
 
-export default function Home() {
-  const { isAuthReady, isAiReady, loading } = useDiagnostics();
+export default function LandingPage() {
+  const features = [
+    {
+      icon: <ImagePlus className="h-6 w-6" />,
+      title: "Adicionar Tatuagem",
+      description: "Aplique designs realistas em fotos do seu corpo",
+      color: "bg-blue-50 border-blue-200 dark:bg-blue-950/20"
+    },
+    {
+      icon: <Eraser className="h-6 w-6" />,
+      title: "Remover Tatuagem", 
+      description: "Remova tatuagens com reconstrução natural da pele",
+      color: "bg-red-50 border-red-200 dark:bg-red-950/20"
+    },
+    {
+      icon: <Sparkles className="h-6 w-6" />,
+      title: "Retocar Tatuagem",
+      description: "Melhore cores, nitidez e qualidade",
+      color: "bg-green-50 border-green-200 dark:bg-green-950/20"
+    }
+  ];
+
+  const benefits = [
+    "Qualidade fotorrealista com IA avançada",
+    "Processamento rápido em menos de 10 segundos", 
+    "3 créditos gratuitos para experimentar",
+    "Preservação natural da textura da pele",
+    "Interface intuitiva e fácil de usar",
+    "Resultados em alta resolução"
+  ];
+
+  const examples = [
+    {
+      type: "Adicionar",
+      before: "Braço sem tatuagem",
+      after: "Tatuagem de dragão aplicada",
+      tag: "Realista"
+    },
+    {
+      type: "Remover", 
+      before: "Braço com tatuagem antiga",
+      after: "Pele natural reconstruída",
+      tag: "Natural"
+    },
+    {
+      type: "Retocar",
+      before: "Tatuagem desbotada",
+      after: "Cores vibrantes restauradas", 
+      tag: "Vibrante"
+    }
+  ];
+
   return (
-    <main className="flex-1 container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto text-center space-y-8">
-        <div className="space-y-4">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
-              <Bot className="h-7 w-7 text-primary" />
-            </div>
-            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-              Starter Kit
+    <main className="flex-1">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="space-y-4">
+            <Badge variant="secondary" className="mb-4">
+              <Zap className="h-3 w-3 mr-1" />
+              Tecnologia Google Gemini 2.5 Flash
+            </Badge>
+            
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
+              Visualize Tatuagens com IA
             </h1>
+            
+            <h2 className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+              Experimente tatuagens virtualmente com qualidade fotorrealista antes de torná-las permanentes
+            </h2>
           </div>
-          <h2 className="text-2xl font-semibold text-muted-foreground">
-            Complete Boilerplate for AI Applications
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            A complete agentic coding boilerplate with authentication, database, AI
-            integration, and modern tooling for building AI-powered applications
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Button asChild size="lg" className="min-w-[200px]">
+              <Link href="/tattoo">
+                Começar Grátis
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            
+            <Button variant="outline" size="lg" className="min-w-[200px]">
+              <Play className="mr-2 h-4 w-4" />
+              Ver Demonstração
+            </Button>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            ✨ 3 créditos gratuitos • Sem cartão de crédito necessário
           </p>
         </div>
+      </section>
 
-        {/* YouTube Tutorial Video */}
-        <div className="space-y-4">
-          <h3 className="text-2xl font-semibold flex items-center justify-center gap-2">
-            <Video className="h-6 w-6" />
-            Video Tutorial
-          </h3>
-          <p className="text-muted-foreground">
-            Watch the complete walkthrough of this agentic coding boilerplate:
-          </p>
-          <div className="relative w-full max-w-3xl mx-auto">
-            <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-lg border">
-              <iframe
-                className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/T0zFZsr_d0Q"
-                title="Agentic Coding Boilerplate Tutorial"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+      {/* Features Section */}
+      <section className="bg-muted/30 py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold mb-4">Como Funciona</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Nossa IA avançada cria resultados fotorrealistas em segundos
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className={`transition-all duration-200 hover:scale-105 ${feature.color}`}>
+                <CardContent className="p-6 text-center">
+                  <div className="mx-auto mb-4 p-3 rounded-full bg-background/80 w-fit">
+                    {feature.icon}
+                  </div>
+                  <h4 className="text-lg font-semibold mb-2">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Examples Gallery */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold mb-4">Galeria de Exemplos</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Veja a qualidade fotorrealista dos nossos resultados
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {examples.map((example, index) => (
+              <Card key={index} className="overflow-hidden">
+                <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative">
+                  <Badge className="absolute top-3 left-3 text-xs">
+                    {example.tag}
+                  </Badge>
+                  <div className="text-center">
+                    <p className="text-sm font-medium">{example.type}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Exemplo</p>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-muted-foreground">Antes: {example.before}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-muted-foreground">Depois: {example.after}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="bg-muted/30 py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold mb-4">Por que Escolher TattooPreview?</h3>
+              <p className="text-muted-foreground">
+                A tecnologia mais avançada para visualização de tatuagens
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{benefit}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-          <div className="p-6 border rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Authentication
+      {/* Final CTA */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <h3 className="text-3xl font-bold">
+              Pronto para Ver Sua Tatuagem?
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Better Auth with Google OAuth integration
+            <p className="text-muted-foreground">
+              Comece gratuitamente com 3 créditos. Não é necessário cartão de crédito.
             </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Database
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Drizzle ORM with PostgreSQL setup
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              AI Ready
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Vercel AI SDK with OpenAI integration
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Palette className="h-4 w-4" />
-              UI Components
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              shadcn/ui with Tailwind CSS
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-6 mt-12">
-          <SetupChecklist />
-
-          <h3 className="text-2xl font-semibold">Next Steps</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">
-                1. Set up environment variables
-              </h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Copy <code>.env.example</code> to <code>.env.local</code> and
-                configure:
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>POSTGRES_URL (PostgreSQL connection string)</li>
-                <li>GOOGLE_CLIENT_ID (OAuth credentials)</li>
-                <li>GOOGLE_CLIENT_SECRET (OAuth credentials)</li>
-                <li>OPENAI_API_KEY (for AI functionality)</li>
-              </ul>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">2. Set up your database</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Run database migrations:
-              </p>
-              <div className="space-y-2">
-                <code className="text-sm bg-muted p-2 rounded block">
-                  npm run db:generate
-                </code>
-                <code className="text-sm bg-muted p-2 rounded block">
-                  npm run db:migrate
-                </code>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild size="lg" className="min-w-[200px]">
+                <Link href="/tattoo">
+                  <Star className="mr-2 h-4 w-4" />
+                  Experimentar Grátis
+                </Link>
+              </Button>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Shield className="h-4 w-4" />
+                Seguro e privado
               </div>
             </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">3. Try the features</h4>
-              <div className="space-y-2">
-                {loading || !isAuthReady ? (
-                  <Button size="sm" className="w-full" disabled={true}>
-                    View Dashboard
-                  </Button>
-                ) : (
-                  <Button asChild size="sm" className="w-full">
-                    <Link href="/dashboard">View Dashboard</Link>
-                  </Button>
-                )}
-                {loading || !isAiReady ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={true}
-                  >
-                    Try AI Chat
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                  >
-                    <Link href="/chat">Try AI Chat</Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">4. Start building</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Customize the components, add your own pages, and build your
-                application on top of this solid foundation.
-              </p>
-              <StarterPromptModal />
-            </div>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

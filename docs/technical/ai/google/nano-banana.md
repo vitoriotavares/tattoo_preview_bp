@@ -142,3 +142,8 @@ O Gemini 2.5 Flash Image Preview, apelidado "Nano Banana", foi lançado em 26 de
   3. Seja específico sobre localização: "inner forearm", "upper back", etc.
   4. Mencione qualidade: "professional tattoo photography", "high-resolution"
   5. Iteração é chave: Refine em múltiplos passos para resultado perfeito
+
+
+
+
+  models/gemini-2.5-flash-image-preview

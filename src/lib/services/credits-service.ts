@@ -2,6 +2,8 @@ import { db } from '@/lib/db';
 import { userCredits, creditPackages, purchases } from '@/lib/schema';
 import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { stripe } from '@/lib/stripe';
+import Stripe from 'stripe';
 
 export interface UserCreditsInfo {
   id: string;
@@ -245,5 +247,182 @@ export class CreditsService {
       style: 'currency',
       currency: 'USD',
     }).format(price);
+  }
+
+  // Stripe Integration Methods
+
+  /**
+   * Create a Stripe checkout session for purchasing credits
+   */
+  static async createCheckoutSession(
+    packageId: string,
+    userId: string,
+    successUrl: string,
+    cancelUrl: string
+  ): Promise<Stripe.Checkout.Session> {
+    // Get the credit package
+    const packageResult = await db
+      .select()
+      .from(creditPackages)
+      .where(and(
+        eq(creditPackages.id, packageId),
+        eq(creditPackages.active, true)
+      ))
+      .limit(1);
+
+    if (packageResult.length === 0) {
+      throw new Error('Package not found or inactive');
+    }
+
+    const creditPackage = packageResult[0];
+
+    if (!creditPackage.stripePriceId) {
+      throw new Error('Package does not have a Stripe price configured');
+    }
+
+    // Create checkout session
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: creditPackage.stripePriceId,
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId,
+        packageId,
+        credits: creditPackage.credits.toString(),
+      },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: undefined, // Will be filled by Stripe
+    });
+
+    return session;
+  }
+
+  /**
+   * Handle successful Stripe payment webhook
+   */
+  static async handleStripePaymentSuccess(
+    session: Stripe.Checkout.Session
+  ): Promise<boolean> {
+    try {
+      console.log('=== CREDITS SERVICE: Processing payment ===');
+      const { userId, packageId, credits } = session.metadata || {};
+      
+      console.log('Metadata - userId:', userId, 'packageId:', packageId, 'credits:', credits);
+      
+      if (!userId || !packageId || !credits) {
+        console.error('❌ Missing required metadata in Stripe session');
+        throw new Error('Missing required metadata in Stripe session');
+      }
+
+      const creditsToAdd = parseInt(credits, 10);
+      console.log('Adding credits to user:', creditsToAdd);
+      
+      // Create purchase record
+      const purchaseId = nanoid();
+      console.log('Creating purchase record with ID:', purchaseId);
+      
+      await db.insert(purchases).values({
+        id: purchaseId,
+        userId,
+        packageId,
+        stripePaymentIntentId: session.payment_intent as string,
+        stripeSessionId: session.id,
+        amount: session.amount_total?.toString() || '0',
+        currency: session.currency || 'usd',
+        credits: creditsToAdd,
+        status: 'completed',
+        completedAt: new Date(),
+      });
+      
+      console.log('✅ Purchase record created');
+
+      // Add credits to user
+      const updatedCredits = await this.addCredits(userId, creditsToAdd, purchaseId);
+      console.log('✅ Credits added. New totals:', {
+        total: updatedCredits.totalCredits,
+        used: updatedCredits.usedCredits,
+        available: updatedCredits.availableCredits
+      });
+
+      return true;
+    } catch (error) {
+      console.error('❌ Error handling Stripe payment:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update credit packages with Stripe price IDs
+   */
+  static async updatePackageStripePrices(packageUpdates: {
+    id: string;
+    stripePriceId: string;
+  }[]): Promise<void> {
+    for (const update of packageUpdates) {
+      await db
+        .update(creditPackages)
+        .set({ 
+          stripePriceId: update.stripePriceId,
+          updatedAt: new Date()
+        })
+        .where(eq(creditPackages.id, update.id));
+    }
+  }
+
+  /**
+   * Create Stripe products and prices for credit packages
+   */
+  static async createStripeProductsAndPrices(): Promise<void> {
+    const packages = await this.getAvailablePackages();
+    const updates: { id: string; stripePriceId: string }[] = [];
+
+    for (const pkg of packages) {
+      if (pkg.stripePriceId) {
+        continue; // Already has a Stripe price
+      }
+
+      try {
+        // Create product
+        const product = await stripe.products.create({
+          name: `TattooPreview - ${pkg.name}`,
+          description: `${pkg.credits} créditos para processamento de tatuagens`,
+          metadata: {
+            packageId: pkg.id,
+            credits: pkg.credits.toString(),
+          },
+        });
+
+        // Create price
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: parseInt(pkg.price, 10),
+          currency: 'usd',
+          metadata: {
+            packageId: pkg.id,
+            credits: pkg.credits.toString(),
+          },
+        });
+
+        updates.push({
+          id: pkg.id,
+          stripePriceId: price.id,
+        });
+
+        console.log(`Created Stripe product and price for package ${pkg.name}: ${price.id}`);
+      } catch (error) {
+        console.error(`Error creating Stripe product for package ${pkg.id}:`, error);
+      }
+    }
+
+    if (updates.length > 0) {
+      await this.updatePackageStripePrices(updates);
+      console.log(`Updated ${updates.length} packages with Stripe price IDs`);
+    }
   }
 }

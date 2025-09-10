@@ -73,7 +73,7 @@ export function useCredits() {
 
   const createCheckoutMutation = useMutation({
     mutationFn: async (packageId: string) => {
-      const response = await fetch("/api/credits/checkout", {
+      const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

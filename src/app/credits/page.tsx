@@ -2,7 +2,7 @@
 
 import { PackageCards } from "@/components/credits/package-cards";
 import { useCredits } from "@/hooks/use-credits";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Coins, Zap, Shield, Clock } from "lucide-react";

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ImagePlus, Upload, Wand2, Loader2, Download, AlertCircle } from "lucide-react";
+import { ArrowLeft, Wand2, Loader2, Download, AlertCircle } from "lucide-react";
 import { ImageUploader } from "@/components/tattoo/image-uploader";
 import { useCredits } from "@/hooks/use-credits";
 import { AuthGuard } from "@/components/auth/auth-guard";
@@ -22,7 +22,6 @@ interface UploadedImage {
 
 function TattooEditorContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const mode = (searchParams.get('mode') as TattooMode) || 'add';
   
   const { hasCredits, availableCredits, isLoading: creditsLoading } = useCredits();
@@ -189,6 +188,7 @@ function TattooEditorContent() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="relative rounded-lg overflow-hidden border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={result}
                 alt="Resultado processado"

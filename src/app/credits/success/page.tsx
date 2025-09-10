@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft, Zap } from "lucide-react";
@@ -11,7 +11,6 @@ import Link from "next/link";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { refreshCredits, credits, isLoading } = useCredits();
   const [isRefreshing, setIsRefreshing] = useState(true);
 

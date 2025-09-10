@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Ao acessar e usar o TattooPreview ("Serviço"), você concorda em cumprir e estar 
+              Ao acessar e usar o TattooPreview (&quot;Serviço&quot;), você concorda em cumprir e estar 
               vinculado a estes Termos de Serviço. Se você não concorda com qualquer parte 
               destes termos, não deve usar nosso serviço.
             </p>
@@ -162,7 +162,7 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              O serviço é fornecido "como está". Não garantimos resultados perfeitos, 
+              O serviço é fornecido &quot;como está&quot;. Não garantimos resultados perfeitos, 
               pois a qualidade depende de vários fatores incluindo qualidade da imagem 
               original. Fazemos nosso melhor esforço para fornecer resultados de alta qualidade, 
               mas não podemos garantir resultados específicos.

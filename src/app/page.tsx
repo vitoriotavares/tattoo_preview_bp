@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ImagePlus, Eraser, Sparkles, Play, Star, Zap, Shield, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Modal, ModalTrigger, ModalBody, ModalContent } from "@/components/ui/animated-modal";
+import { Compare } from "@/components/ui/compare";
 
 export default function LandingPage() {
   const features = [
@@ -65,10 +66,16 @@ export default function LandingPage() {
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="space-y-4">
-            <Badge variant="secondary" className="mb-4">
-              <Zap className="h-3 w-3 mr-1" />
-              Tecnologia Google Gemini 2.5 Flash
-            </Badge>
+            <button className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block mb-4">
+              <span className="absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              </span>
+              <div className="relative flex space-x-2 items-center z-10 rounded-full bg-zinc-950 py-0.5 px-4 ring-1 ring-white/10">
+                <Zap className="h-3 w-3" />
+                <span>Tecnologia Google Gemini 2.5 Flash</span>
+              </div>
+              <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40" />
+            </button>
             
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
               Visualize Tatuagens com IA
@@ -181,32 +188,42 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {examples.map((example, index) => (
-              <Card key={index} className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative">
-                  <Badge className="absolute top-3 left-3 text-xs">
-                    {example.tag}
-                  </Badge>
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{example.type}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Exemplo</p>
+          <div className="flex justify-center max-w-4xl mx-auto">
+            {/* Interactive Compare Example - Centralized */}
+            <Card className="overflow-hidden max-w-2xl w-full">
+              <div className="relative">
+                <Badge className="absolute top-3 left-3 text-xs z-50">
+                  Interativo
+                </Badge>
+                <Compare
+                  firstImage="/images/com_tatu_retocada.png"
+                  secondImage="/images/sem_tatu_fundo_branco.png"
+                  className="w-full h-80 rounded-none"
+                  firstImageClassName="object-cover"
+                  secondImageClassname="object-cover"
+                  slideMode="hover"
+                  showHandlebar={true}
+                />
+              </div>
+              <CardContent className="p-6">
+                <div className="space-y-3 text-center">
+                  <h4 className="text-lg font-semibold">Remoção de Tatuagem com IA</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Passe o mouse sobre a imagem para ver a transformação. Nossa IA reconstrói a pele naturalmente, tornando quase impossível identificar onde estava a tatuagem original.
+                  </p>
+                  <div className="flex items-center justify-center gap-6 pt-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-3 h-3 bg-destructive rounded-full"></div>
+                      <span className="text-muted-foreground">Antes: Com tatuagem</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                      <span className="text-muted-foreground">Depois: Pele natural</span>
+                    </div>
                   </div>
                 </div>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 bg-destructive rounded-full"></div>
-                      <span className="text-muted-foreground">Antes: {example.before}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      <span className="text-muted-foreground">Depois: {example.after}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

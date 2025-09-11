@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ImagePlus, Eraser, Sparkles, Play, Star, Zap, Shield, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Modal, ModalTrigger, ModalBody, ModalContent } from "@/components/ui/animated-modal";
 import { Compare } from "@/components/ui/compare";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 export default function LandingPage() {
   const features = [
@@ -43,8 +44,9 @@ export default function LandingPage() {
   return (
     <main className="flex-1">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <section className="relative container mx-auto px-4 py-16 text-center overflow-hidden">
+        <BackgroundBeams className="absolute inset-0 z-0" />
+        <div className="relative max-w-4xl mx-auto space-y-8 z-10">
           <div className="space-y-4">
             <button className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block mb-4">
               <span className="absolute inset-0 overflow-hidden rounded-full">

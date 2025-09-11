@@ -9,7 +9,8 @@ import { ImagePlus, Eraser, Sparkles, Upload, ArrowRight } from "lucide-react";
 import { useCredits } from "@/hooks/use-credits";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AuthGuard } from "@/components/auth/auth-guard";
+import { useSession } from "@/hooks/use-session";
+import { signIn } from "@/lib/auth-client";
 
 type TattooMode = 'add' | 'remove' | 'enhance';
 
@@ -57,21 +58,32 @@ const modes = [
 
 export default function TattooPage() {
   const [selectedMode, setSelectedMode] = useState<TattooMode>('add');
-  const { hasCredits, availableCredits, isLoading } = useCredits();
+  const { isAuthenticated } = useSession();
+  const { hasCredits, availableCredits, isLoading: creditsLoading } = useCredits();
   const router = useRouter();
 
-  const handleStartEditing = (mode: TattooMode) => {
-    if (!hasCredits && !isLoading) {
+  const handleStartEditing = async (mode: TattooMode) => {
+    // First check if user is authenticated
+    if (!isAuthenticated) {
+      await signIn.social({ 
+        provider: "google",
+        callbackURL: "/tattoo"
+      });
+      return;
+    }
+    
+    // Then check credits
+    if (!hasCredits && !creditsLoading) {
       router.push('/credits');
       return;
     }
     
+    // Finally, proceed to editor
     router.push(`/tattoo/editor?mode=${mode}`);
   };
 
   return (
-    <AuthGuard>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
@@ -81,20 +93,22 @@ export default function TattooPage() {
           Visualize tatuagens com qualidade fotorrealista usando IA avançada
         </p>
         
-        {/* Credits Display */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <Badge variant={hasCredits ? "default" : "destructive"} className="text-sm px-3 py-1">
-            {isLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
-          </Badge>
-          
-          {!hasCredits && !isLoading && (
-            <Button asChild size="sm">
-              <Link href="/credits">
-                Comprar Créditos
-              </Link>
-            </Button>
-          )}
-        </div>
+        {/* Credits Display - only show if authenticated */}
+        {isAuthenticated && (
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Badge variant={hasCredits ? "default" : "destructive"} className="text-sm px-3 py-1">
+              {creditsLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
+            </Badge>
+            
+            {!hasCredits && !creditsLoading && (
+              <Button asChild size="sm">
+                <Link href="/credits">
+                  Comprar Créditos
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Mode Selection */}
@@ -168,11 +182,13 @@ export default function TattooPage() {
                     <Button 
                       size="lg" 
                       onClick={() => handleStartEditing(mode.id)}
-                      disabled={isLoading}
+                      disabled={creditsLoading}
                       className="min-w-[200px]"
                     >
-                      {isLoading ? (
+                      {creditsLoading ? (
                         "Carregando..."
+                      ) : !isAuthenticated ? (
+                        "Fazer Login e Começar"
                       ) : !hasCredits ? (
                         "Comprar Créditos"
                       ) : (
@@ -216,7 +232,6 @@ export default function TattooPage() {
           Resultados com qualidade fotorrealista em menos de 10 segundos
         </p>
       </div>
-      </div>
-    </AuthGuard>
+    </div>
   );
 }

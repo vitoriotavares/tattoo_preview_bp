@@ -241,10 +241,10 @@ Após o primeiro deploy, acesse:
 
 - **Gratuitos**: 3 créditos por usuário novo
 - **Pacotes Pagos**:
-  - Starter: 5 créditos - $9.90
-  - Popular: 15 créditos - $24.90  
-  - Pro: 40 créditos - $49.90
-  - Studio: 100 créditos - $99.90
+  - Starter: 10 créditos - R$ 14,90
+  - Popular: 30 créditos - R$ 34,90
+  - Pro: 75 créditos - R$ 69,90
+  - Studio: 200 créditos - R$ 149,90
 
 ## 🔧 API Routes
 

@@ -149,44 +149,61 @@ export class CreditsService {
   static async createDefaultPackages(): Promise<void> {
     const defaultPackages = [
       {
-        id: nanoid(),
         name: 'Starter',
-        credits: 5,
-        price: '990', // $9.90 in cents
-        stripePriceId: null,
+        credits: 10,
+        price: '1490', // R$ 14,90 in cents (BRL)
+        stripePriceId: null, // TODO: Add Stripe Price ID after creating in dashboard
         active: true,
       },
       {
-        id: nanoid(),
         name: 'Popular',
-        credits: 15,
-        price: '2490', // $24.90 in cents
-        stripePriceId: null,
+        credits: 30,
+        price: '3490', // R$ 34,90 in cents (BRL)
+        stripePriceId: null, // TODO: Add Stripe Price ID after creating in dashboard
         active: true,
       },
       {
-        id: nanoid(),
         name: 'Pro',
-        credits: 40,
-        price: '4990', // $49.90 in cents
-        stripePriceId: null,
+        credits: 75,
+        price: '6990', // R$ 69,90 in cents (BRL)
+        stripePriceId: null, // TODO: Add Stripe Price ID after creating in dashboard
         active: true,
       },
       {
-        id: nanoid(),
         name: 'Studio',
-        credits: 100,
-        price: '9990', // $99.90 in cents
-        stripePriceId: null,
+        credits: 200,
+        price: '14990', // R$ 149,90 in cents (BRL)
+        stripePriceId: null, // TODO: Add Stripe Price ID after creating in dashboard
         active: true,
       },
     ];
 
     // Check if packages already exist
-    const existing = await db.select().from(creditPackages).limit(1);
+    const existing = await db.select().from(creditPackages);
     
     if (existing.length === 0) {
-      await db.insert(creditPackages).values(defaultPackages);
+      // Create new packages
+      const packagesWithIds = defaultPackages.map(pkg => ({
+        id: nanoid(),
+        ...pkg,
+      }));
+      await db.insert(creditPackages).values(packagesWithIds);
+    } else {
+      // Update existing packages with new values
+      for (const newPackage of defaultPackages) {
+        const existingPackage = existing.find(pkg => pkg.name === newPackage.name);
+        if (existingPackage) {
+          await db
+            .update(creditPackages)
+            .set({
+              credits: newPackage.credits,
+              price: newPackage.price,
+              active: newPackage.active,
+              updatedAt: new Date(),
+            })
+            .where(eq(creditPackages.id, existingPackage.id));
+        }
+      }
     }
   }
 
@@ -208,7 +225,7 @@ export class CreditsService {
       stripePaymentIntentId,
       amount,
       credits,
-      currency: 'usd',
+      currency: 'brl',
       status: 'pending',
     });
 
@@ -245,7 +262,7 @@ export class CreditsService {
     const price = parseFloat(priceInCents) / 100;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'BRL',
     }).format(price);
   }
 
@@ -284,6 +301,7 @@ export class CreditsService {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
+      currency: 'brl',
       line_items: [
         {
           price: creditPackage.stripePriceId,
@@ -334,7 +352,7 @@ export class CreditsService {
         stripePaymentIntentId: session.payment_intent as string,
         stripeSessionId: session.id,
         amount: session.amount_total?.toString() || '0',
-        currency: session.currency || 'usd',
+        currency: session.currency || 'brl',
         credits: creditsToAdd,
         status: 'completed',
         completedAt: new Date(),
@@ -402,7 +420,7 @@ export class CreditsService {
         const price = await stripe.prices.create({
           product: product.id,
           unit_amount: parseInt(pkg.price, 10),
-          currency: 'usd',
+          currency: 'brl',
           metadata: {
             packageId: pkg.id,
             credits: pkg.credits.toString(),

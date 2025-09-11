@@ -106,7 +106,7 @@ export const purchases = pgTable("purchases", {
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   stripeSessionId: text("stripe_session_id"), // Stripe checkout session ID
   amount: decimal("amount", { precision: 8, scale: 2 }).notNull(), // amount in cents
-  currency: text("currency").notNull().default('usd'),
+  currency: text("currency").notNull().default('brl'),
   credits: integer("credits").notNull(), // credits purchased
   status: text("status", { enum: ['pending', 'completed', 'failed', 'refunded'] })
     .notNull()

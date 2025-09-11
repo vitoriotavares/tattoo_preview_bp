@@ -54,10 +54,10 @@ Este comando criará automaticamente os produtos e preços no Stripe baseados no
 
 Os seguintes pacotes são criados automaticamente:
 
-- **Starter**: 5 créditos por $9.90
-- **Popular**: 15 créditos por $24.90
-- **Pro**: 40 créditos por $49.90
-- **Studio**: 100 créditos por $99.90
+- **Starter**: 10 créditos por R$ 14,90
+- **Popular**: 30 créditos por R$ 34,90
+- **Pro**: 75 créditos por R$ 69,90
+- **Studio**: 200 créditos por R$ 149,90
 
 ## 5. Fluxo de Pagamento
 

@@ -16,12 +16,12 @@ export async function POST(_request: NextRequest) {
     const mockSession = {
       id: 'cs_test_debug123',
       payment_intent: 'pi_test_debug123',
-      amount_total: 990, // $9.90
-      currency: 'usd',
+      amount_total: 1490, // R$ 14,90
+      currency: 'brl',
       metadata: {
         userId: 'test_user_id_123',
         packageId: 'test_package_id_123',
-        credits: '5'
+        credits: '10'
       }
     };
 

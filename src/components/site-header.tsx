@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { UserProfile } from "@/components/auth/user-profile";
 import { CreditCounter } from "@/components/credits/credit-counter";
 import { ModeToggle } from "./ui/mode-toggle";
 import { Button } from "./ui/button";
-import { Palette } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 
 export function SiteHeader() {
@@ -19,10 +19,14 @@ export function SiteHeader() {
             href="/"
             className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
-              <Palette className="h-5 w-5" />
-            </div>
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <Image
+              src="/images/logo.png"
+              alt="TattooPreview Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="hidden sm:inline bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               TattooPreview
             </span>
           </Link>

@@ -118,7 +118,7 @@ export function useCredits() {
       const price = parseFloat(priceInCents) / 100;
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'BRL',
       }).format(price);
     },
     

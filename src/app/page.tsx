@@ -39,26 +39,6 @@ export default function LandingPage() {
     "Resultados em alta resolução"
   ];
 
-  const examples = [
-    {
-      type: "Adicionar",
-      before: "Braço sem tatuagem",
-      after: "Tatuagem de dragão aplicada",
-      tag: "Realista"
-    },
-    {
-      type: "Remover", 
-      before: "Braço com tatuagem antiga",
-      after: "Pele natural reconstruída",
-      tag: "Natural"
-    },
-    {
-      type: "Retocar",
-      before: "Tatuagem desbotada",
-      after: "Cores vibrantes restauradas", 
-      tag: "Vibrante"
-    }
-  ];
 
   return (
     <main className="flex-1">

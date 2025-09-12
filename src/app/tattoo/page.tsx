@@ -59,7 +59,7 @@ const modes = [
 export default function TattooPage() {
   const [selectedMode, setSelectedMode] = useState<TattooMode>('add');
   const { isAuthenticated } = useSession();
-  const { hasCredits, availableCredits, isLoading: creditsLoading } = useCredits();
+  const { hasCredits, availableCredits, isLoading: creditsLoading, refreshCredits } = useCredits();
   const router = useRouter();
 
   const handleStartEditing = async (mode: TattooMode) => {
@@ -96,8 +96,18 @@ export default function TattooPage() {
         {/* Credits Display - only show if authenticated */}
         {isAuthenticated && (
           <div className="flex items-center justify-center gap-4 mb-6">
-            <Badge variant={hasCredits ? "default" : "destructive"} className="text-sm px-3 py-1">
-              {creditsLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
+            <Badge 
+              variant={hasCredits ? "default" : "destructive"} 
+              className="text-sm px-3 py-1 transition-all duration-200"
+            >
+              {creditsLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 border border-current border-r-transparent rounded-full animate-spin"></div>
+                  Carregando...
+                </div>
+              ) : (
+                `${availableCredits} créditos disponíveis`
+              )}
             </Badge>
             
             {!hasCredits && !creditsLoading && (

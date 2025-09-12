@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useCallback, useRef, useEffect } from "react";
 
 interface UserCreditsInfo {
   id: string;
@@ -25,6 +25,7 @@ interface CreditPackage {
 
 export function useCredits() {
   const queryClient = useQueryClient();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     data: credits,
@@ -71,6 +72,63 @@ export function useCredits() {
     },
   });
 
+  // New secure transaction mutations
+  const reserveCreditMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/credits/reserve", {
+        method: "POST",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to reserve credit");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Don't invalidate here - credit isn't actually consumed yet
+    },
+  });
+
+  const confirmCreditMutation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const response = await fetch("/api/credits/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reservationId }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to confirm credit consumption");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+    },
+  });
+
+  const rollbackCreditMutation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const response = await fetch("/api/credits/rollback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reservationId }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to rollback credit reservation");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+    },
+  });
+
   const createCheckoutMutation = useMutation({
     mutationFn: async (packageId: string) => {
       const response = await fetch("/api/stripe/checkout", {
@@ -88,7 +146,7 @@ export function useCredits() {
     },
   });
 
-  return {
+  const hookReturn = {
     // Data
     credits,
     packages,
@@ -110,6 +168,16 @@ export function useCredits() {
     consumeCredit: consumeCreditMutation.mutateAsync,
     isConsumingCredit: consumeCreditMutation.isPending,
     
+    // New secure transaction methods
+    reserveCredit: reserveCreditMutation.mutateAsync,
+    isReservingCredit: reserveCreditMutation.isPending,
+    
+    confirmCredit: confirmCreditMutation.mutateAsync,
+    isConfirmingCredit: confirmCreditMutation.isPending,
+    
+    rollbackCredit: rollbackCreditMutation.mutateAsync,
+    isRollingBackCredit: rollbackCreditMutation.isPending,
+    
     createCheckoutSession: createCheckoutMutation.mutateAsync,
     isCreatingCheckout: createCheckoutMutation.isPending,
     
@@ -125,5 +193,58 @@ export function useCredits() {
     refreshCredits: () => {
       queryClient.invalidateQueries({ queryKey: ["user-credits"] });
     },
+
+    // Real-time polling methods
+    startPolling: useCallback((intervalMs: number = 2000) => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+      
+      pollingIntervalRef.current = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+      }, intervalMs);
+    }, [queryClient]),
+
+    stopPolling: useCallback(() => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    }, []),
+
+    // Enhanced transaction workflow
+    processWithSecureCredits: useCallback(async (processCallback: () => Promise<unknown>) => {
+      try {
+        // Step 1: Reserve credit
+        const reservation = await reserveCreditMutation.mutateAsync();
+        
+        try {
+          // Step 2: Execute the process
+          const result = await processCallback();
+          
+          // Step 3: Confirm credit consumption on success
+          await confirmCreditMutation.mutateAsync(reservation.reservationId);
+          
+          return result;
+        } catch (processError) {
+          // Step 3b: Rollback credit on failure
+          await rollbackCreditMutation.mutateAsync(reservation.reservationId);
+          throw processError;
+        }
+      } catch (reservationError) {
+        throw reservationError;
+      }
+    }, [reserveCreditMutation, confirmCreditMutation, rollbackCreditMutation]),
   };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  return hookReturn;
 }

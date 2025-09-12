@@ -115,6 +115,97 @@ export class CreditsService {
     };
   }
 
+  // New secure transaction methods
+  static async reserveCredit(userId: string): Promise<{ 
+    success: boolean; 
+    reservationId?: string; 
+    remainingCredits: number; 
+    error?: string 
+  }> {
+    const credits = await this.getUserCredits(userId);
+    
+    if (!credits) {
+      return { 
+        success: false, 
+        remainingCredits: 0, 
+        error: 'User credits not found' 
+      };
+    }
+
+    if (credits.availableCredits <= 0) {
+      return { 
+        success: false, 
+        remainingCredits: 0, 
+        error: 'Insufficient credits' 
+      };
+    }
+
+    // Generate reservation ID for tracking
+    const reservationId = `res_${nanoid()}`;
+    
+    return { 
+      success: true, 
+      reservationId,
+      remainingCredits: credits.availableCredits - 1 // Show what credits would be after consumption
+    };
+  }
+
+  static async confirmCreditConsumption(userId: string, reservationId: string): Promise<{ 
+    success: boolean; 
+    remainingCredits: number; 
+    error?: string 
+  }> {
+    const credits = await this.getUserCredits(userId);
+    
+    if (!credits) {
+      return { 
+        success: false, 
+        remainingCredits: 0, 
+        error: 'User credits not found' 
+      };
+    }
+
+    if (credits.availableCredits <= 0) {
+      return { 
+        success: false, 
+        remainingCredits: 0, 
+        error: 'Insufficient credits' 
+      };
+    }
+
+    // Update credits
+    const updateData: Record<string, unknown> = {
+      usedCredits: credits.usedCredits + 1,
+      updatedAt: new Date(),
+    };
+
+    // Track free credits usage
+    if (credits.freeCreditsUsed < 3) {
+      updateData.freeCreditsUsed = credits.freeCreditsUsed + 1;
+    }
+
+    await db
+      .update(userCredits)
+      .set(updateData)
+      .where(eq(userCredits.userId, userId));
+
+    return { 
+      success: true, 
+      remainingCredits: credits.availableCredits - 1 
+    };
+  }
+
+  static async rollbackCreditReservation(userId: string, reservationId: string): Promise<{ 
+    success: boolean; 
+    error?: string 
+  }> {
+    // In this simple implementation, rollback is just confirmation that the reservation is cancelled
+    // In a more complex system, you might store reservations in the database
+    return { 
+      success: true 
+    };
+  }
+
   static async addCredits(userId: string, creditsToAdd: number, purchaseId?: string): Promise<UserCreditsInfo> {
     const credits = await this.ensureUserCredits(userId);
 

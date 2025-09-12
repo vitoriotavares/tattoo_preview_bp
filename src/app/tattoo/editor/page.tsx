@@ -24,7 +24,14 @@ function TattooEditorContent() {
   const searchParams = useSearchParams();
   const mode = (searchParams.get('mode') as TattooMode) || 'add';
   
-  const { hasCredits, availableCredits, isLoading: creditsLoading } = useCredits();
+  const { 
+    hasCredits, 
+    availableCredits, 
+    isLoading: creditsLoading,
+    startPolling,
+    stopPolling,
+    refreshCredits
+  } = useCredits();
   
   const [bodyImage, setBodyImage] = useState<UploadedImage | null>(null);
   const [tattooImage, setTattooImage] = useState<UploadedImage | null>(null);
@@ -83,6 +90,9 @@ function TattooEditorContent() {
     setIsProcessing(true);
     setProcessingError(null);
     
+    // Start polling for real-time credit updates
+    startPolling(1500);
+    
     try {
       const formData = new FormData();
       formData.append('mode', mode);
@@ -120,11 +130,16 @@ function TattooEditorContent() {
       const resultUrl = URL.createObjectURL(resultBlob);
       setResult(resultUrl);
       
+      // Force refresh credits after successful processing
+      refreshCredits();
+      
     } catch (error) {
       console.error('Erro no processamento:', error);
       setProcessingError('Erro na conexão. Verifique sua internet e tente novamente.');
     } finally {
       setIsProcessing(false);
+      // Stop polling when processing is done
+      stopPolling();
     }
   };
 
@@ -164,9 +179,25 @@ function TattooEditorContent() {
 
       {/* Credits Status */}
       <div className="flex items-center justify-center gap-4 mb-8">
-        <Badge variant={hasCredits ? "default" : "destructive"}>
-          {creditsLoading ? "Carregando..." : `${availableCredits} créditos disponíveis`}
+        <Badge 
+          variant={hasCredits ? "default" : "destructive"}
+          className={`transition-all duration-200 ${isProcessing ? 'animate-pulse' : ''}`}
+        >
+          {creditsLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 border border-current border-r-transparent rounded-full animate-spin"></div>
+              Carregando...
+            </div>
+          ) : (
+            `${availableCredits} créditos disponíveis`
+          )}
         </Badge>
+        
+        {isProcessing && (
+          <Badge variant="secondary" className="animate-pulse">
+            Processando... Crédito será consumido ao finalizar
+          </Badge>
+        )}
         
         {!hasCredits && !creditsLoading && (
           <Button asChild size="sm">
@@ -320,11 +351,24 @@ function TattooEditorContent() {
               <Separator />
 
               <div className="text-center space-y-2">
-                <h4 className="font-medium text-sm">Informações do Processamento</h4>
+                <h4 className="font-medium text-sm">
+                  {isProcessing ? "Status do Processamento" : "Informações do Processamento"}
+                </h4>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>• Tempo estimado: 5-10 segundos</p>
-                  <p>• Qualidade: Fotorrealista com IA avançada</p>
-                  <p>• Custo: 1 crédito por processamento</p>
+                  {isProcessing ? (
+                    <>
+                      <p className="text-blue-600 font-medium">🔄 Processando sua imagem...</p>
+                      <p>🔒 Crédito protegido - só será consumido após sucesso</p>
+                      <p>📊 Seus créditos estão sendo atualizados em tempo real</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>• Tempo estimado: 5-10 segundos</p>
+                      <p>• Qualidade: Fotorrealista com IA avançada</p>
+                      <p>• Custo: 1 crédito por processamento</p>
+                      <p className="text-green-600">🛡️ Sistema seguro - sem perdas de créditos</p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>

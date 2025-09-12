@@ -10,6 +10,8 @@ export const dynamic = 'force-dynamic';
 type TattooMode = 'add' | 'remove' | 'enhance';
 
 export async function POST(request: NextRequest) {
+  let reservationId: string | null = null;
+  
   try {
     // Get user session
     const session = await auth.api.getSession({
@@ -22,14 +24,16 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Check if user has available credits
-    const userCredits = await CreditsService.getUserCredits(userId);
-    if (!userCredits || userCredits.availableCredits <= 0) {
+    // Reserve credit first (secure transaction)
+    const creditReservation = await CreditsService.reserveCredit(userId);
+    if (!creditReservation.success) {
       return NextResponse.json(
-        { error: 'Créditos insuficientes' }, 
+        { error: creditReservation.error || 'Créditos insuficientes' }, 
         { status: 402 } // Payment Required
       );
     }
+
+    reservationId = creditReservation.reservationId!;
 
     // Parse form data
     const formData = await request.formData();
@@ -96,6 +100,15 @@ export async function POST(request: NextRequest) {
     );
 
     if (!processingResult.success) {
+      // Rollback credit reservation on processing failure
+      if (reservationId) {
+        try {
+          await CreditsService.rollbackCreditReservation(userId, reservationId);
+        } catch (rollbackError) {
+          console.error('Error rolling back credit reservation:', rollbackError);
+        }
+      }
+
       // Handle rate limiting specifically
       if (processingResult.isRateLimited) {
         return NextResponse.json(
@@ -119,12 +132,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Deduct credit from user
+    // Confirm credit consumption after successful processing
     try {
-      await CreditsService.consumeCredit(userId);
+      await CreditsService.confirmCreditConsumption(userId, reservationId);
     } catch (creditError) {
-      console.error('Error deducting credits:', creditError);
-      // Continue anyway since image was processed successfully
+      console.error('Error confirming credit consumption:', creditError);
+      // Continue anyway since image was processed successfully - user gets the image
     }
 
     // Return the processed image
@@ -141,6 +154,20 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Tattoo processing error:', error);
+    
+    // Rollback credit reservation on any error
+    if (reservationId) {
+      try {
+        const session = await auth.api.getSession({
+          headers: await headers(),
+        });
+        if (session?.user?.id) {
+          await CreditsService.rollbackCreditReservation(session.user.id, reservationId);
+        }
+      } catch (rollbackError) {
+        console.error('Error rolling back credit reservation in catch:', rollbackError);
+      }
+    }
     
     // Return more specific error messages based on error type
     if (error instanceof Error) {

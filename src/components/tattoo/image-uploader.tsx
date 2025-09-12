@@ -5,8 +5,9 @@ import { useDropzone, FileRejection } from "react-dropzone";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, X, Image as ImageIcon, FileImage } from "lucide-react";
+import { Upload, X, Image as ImageIcon, FileImage, Loader2 } from "lucide-react";
 import Image from "next/image";
+import imageCompression from "browser-image-compression";
 
 interface ImageUploaderProps {
   label: string;
@@ -34,15 +35,74 @@ export function ImageUploader({
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const [error, setError] = useState<string | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState(0);
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+  // Image compression function
+  const compressImage = async (file: File): Promise<File> => {
+    const options = {
+      maxSizeMB: 5, // Compress to max 5MB
+      maxWidthOrHeight: 2048, // Max dimension 2048px
+      useWebWorker: true,
+      initialQuality: 0.8,
+      onProgress: (progress: number) => {
+        setCompressionProgress(Math.round(progress));
+      },
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+      return compressedFile;
+    } catch (error) {
+      console.error('Image compression failed:', error);
+      throw error;
+    }
+  };
+
+  const onDrop = useCallback(async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
     setError(null);
     setIsDragActive(false);
 
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0];
       if (rejection.errors.some((e) => e.code === 'file-too-large')) {
-        setError(`Arquivo muito grande. Máximo permitido: ${maxSize}MB`);
+        // If file is too large, try to compress it anyway
+        const originalFile = rejection.file;
+        if (originalFile.size > maxSize * 1024 * 1024 && originalFile.size < 50 * 1024 * 1024) {
+          // Only try compression if file is between maxSize and 50MB
+          try {
+            setIsCompressing(true);
+            setCompressionProgress(0);
+            
+            const compressedFile = await compressImage(originalFile);
+            
+            if (compressedFile.size <= maxSize * 1024 * 1024) {
+              // Compression successful, use compressed file
+              const reader = new FileReader();
+              reader.onload = () => {
+                const previewUrl = reader.result as string;
+                setPreview(previewUrl);
+                onImageSelect(compressedFile, previewUrl);
+                setIsCompressing(false);
+                setCompressionProgress(0);
+              };
+              reader.readAsDataURL(compressedFile);
+              return;
+            } else {
+              setError(`Arquivo muito grande mesmo após compressão. Máximo permitido: ${maxSize}MB`);
+            }
+          } catch (compressionError) {
+            console.error('Compression failed:', compressionError);
+            setError(`Arquivo muito grande. Máximo permitido: ${maxSize}MB`);
+          } finally {
+            setIsCompressing(false);
+            setCompressionProgress(0);
+          }
+        } else {
+          setError(`Arquivo muito grande. Máximo permitido: ${maxSize}MB`);
+        }
       } else if (rejection.errors.some((e) => e.code === 'file-invalid-type')) {
         setError(`Formato não suportado. Use: ${accept.map(type => type.split('/')[1]).join(', ')}`);
       } else {
@@ -53,15 +113,40 @@ export function ImageUploader({
 
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
-      const reader = new FileReader();
       
-      reader.onload = () => {
-        const previewUrl = reader.result as string;
-        setPreview(previewUrl);
-        onImageSelect(file, previewUrl);
-      };
-      
-      reader.readAsDataURL(file);
+      // Always compress camera photos (usually large files)
+      if (file.size > 2 * 1024 * 1024) { // If file is larger than 2MB, compress it
+        try {
+          setIsCompressing(true);
+          setCompressionProgress(0);
+          
+          const compressedFile = await compressImage(file);
+          
+          const reader = new FileReader();
+          reader.onload = () => {
+            const previewUrl = reader.result as string;
+            setPreview(previewUrl);
+            onImageSelect(compressedFile, previewUrl);
+            setIsCompressing(false);
+            setCompressionProgress(0);
+          };
+          reader.readAsDataURL(compressedFile);
+        } catch (compressionError) {
+          console.error('Compression failed:', compressionError);
+          setError('Erro ao processar a imagem');
+          setIsCompressing(false);
+          setCompressionProgress(0);
+        }
+      } else {
+        // File is small enough, use as-is
+        const reader = new FileReader();
+        reader.onload = () => {
+          const previewUrl = reader.result as string;
+          setPreview(previewUrl);
+          onImageSelect(file, previewUrl);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   }, [accept, maxSize, onImageSelect]);
 
@@ -72,7 +157,7 @@ export function ImageUploader({
   } = useDropzone({
     onDrop,
     accept: accept.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
-    maxSize: maxSize * 1024 * 1024,
+    maxSize: 50 * 1024 * 1024, // Allow up to 50MB initially, we'll compress if needed
     multiple: false,
     onDragEnter: () => setIsDragActive(true),
     onDragLeave: () => setIsDragActive(false)
@@ -81,6 +166,8 @@ export function ImageUploader({
   const handleRemove = () => {
     setPreview(null);
     setError(null);
+    setIsCompressing(false);
+    setCompressionProgress(0);
     onImageRemove?.();
   };
 
@@ -111,55 +198,90 @@ export function ImageUploader({
 
       {!preview ? (
         <Card 
-          className={`border-2 border-dashed transition-colors cursor-pointer hover:border-primary/50 ${
-            isDragActive || dropzoneIsDragActive 
-              ? 'border-primary bg-primary/5' 
-              : error 
-                ? 'border-destructive' 
-                : 'border-muted-foreground/25'
+          className={`border-2 border-dashed transition-colors ${
+            isCompressing 
+              ? 'border-blue-500 bg-blue-50' 
+              : isDragActive || dropzoneIsDragActive 
+                ? 'border-primary bg-primary/5 cursor-pointer hover:border-primary/50' 
+                : error 
+                  ? 'border-destructive' 
+                  : 'border-muted-foreground/25 cursor-pointer hover:border-primary/50'
           }`}
         >
           <CardContent className="p-8">
-            <div 
-              {...getRootProps()}
-              className="flex flex-col items-center justify-center text-center"
-            >
-              <input {...getInputProps()} />
-              
-              <div className={`mb-4 p-3 rounded-full ${
-                isDragActive || dropzoneIsDragActive 
-                  ? 'bg-primary/10' 
-                  : 'bg-muted'
-              }`}>
-                <Upload className={`h-8 w-8 ${
-                  isDragActive || dropzoneIsDragActive 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground'
-                }`} />
-              </div>
+            {isCompressing ? (
+              // Compression Progress UI
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="mb-4 p-3 rounded-full bg-blue-100">
+                  <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+                </div>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  {isDragActive || dropzoneIsDragActive 
-                    ? "Solte a imagem aqui" 
-                    : "Arraste uma imagem ou clique para selecionar"
-                  }
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Formatos: {accept.map(type => type.split('/')[1].toUpperCase()).join(', ')} • Máximo {maxSize}MB
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-blue-900">
+                    Comprimindo imagem...
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    Otimizando para melhor qualidade e velocidade
+                  </p>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-full max-w-xs bg-blue-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${compressionProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-blue-600 font-medium">
+                    {compressionProgress}%
+                  </p>
+                </div>
               </div>
-
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                className="mt-4"
+            ) : (
+              // Upload UI
+              <div 
+                {...getRootProps()}
+                className="flex flex-col items-center justify-center text-center"
               >
-                <FileImage className="h-4 w-4 mr-2" />
-                Selecionar Arquivo
-              </Button>
-            </div>
+                <input {...getInputProps()} />
+                
+                <div className={`mb-4 p-3 rounded-full ${
+                  isDragActive || dropzoneIsDragActive 
+                    ? 'bg-primary/10' 
+                    : 'bg-muted'
+                }`}>
+                  <Upload className={`h-8 w-8 ${
+                    isDragActive || dropzoneIsDragActive 
+                      ? 'text-primary' 
+                      : 'text-muted-foreground'
+                  }`} />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {isDragActive || dropzoneIsDragActive 
+                      ? "Solte a imagem aqui" 
+                      : "Arraste uma imagem ou clique para selecionar"
+                    }
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Formatos: {accept.map(type => type.split('/')[1].toUpperCase()).join(', ')} • Máximo {maxSize}MB
+                  </p>
+                  <p className="text-xs text-green-600 font-medium">
+                    📱 Fotos de câmera são comprimidas automaticamente
+                  </p>
+                </div>
+
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4"
+                >
+                  <FileImage className="h-4 w-4 mr-2" />
+                  Selecionar Arquivo
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (

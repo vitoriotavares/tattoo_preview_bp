@@ -108,7 +108,17 @@ function TattooEditorContent() {
       });
 
       if (!response.ok) {
-        if (response.status === 429) {
+        if (response.status === 413) {
+          // Request Entity Too Large
+          try {
+            const errorData = await response.json();
+            setProcessingError(
+              errorData.error || 'Imagem muito grande. Tente usar uma foto menor ou com menos qualidade.'
+            );
+          } catch {
+            setProcessingError('Imagem muito grande. Tente usar uma foto menor - as fotos são comprimidas automaticamente ao fazer upload.');
+          }
+        } else if (response.status === 429) {
           // Rate limit error
           try {
             const errorData = await response.json();
@@ -120,8 +130,12 @@ function TattooEditorContent() {
             setProcessingError('Cota da API excedida. Aguarde alguns minutos antes de tentar novamente.');
           }
         } else {
-          const errorText = await response.text();
-          setProcessingError(errorText || 'Erro no processamento da imagem');
+          try {
+            const errorData = await response.json();
+            setProcessingError(errorData.error || 'Erro no processamento da imagem');
+          } catch {
+            setProcessingError('Erro no processamento da imagem');
+          }
         }
         return;
       }

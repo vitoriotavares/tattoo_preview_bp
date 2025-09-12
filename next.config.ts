@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Optimizations for production
+  // Increase body size limit for image uploads (camera photos can be large)
   experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb', // Support high-resolution camera photos
+    },
     turbo: {
       rules: {
         '*.svg': {

@@ -64,19 +64,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file sizes (max 10MB each)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file sizes (max 15MB each - increased for compressed images)
+    const maxSize = 15 * 1024 * 1024; // 15MB
     if (bodyImageFile.size > maxSize) {
       return NextResponse.json(
-        { error: 'Imagem do corpo muito grande (máximo 10MB)' },
-        { status: 400 }
+        { error: 'Imagem do corpo muito grande (máximo 15MB). Tente comprimir a imagem ou usar uma foto menor.' },
+        { status: 413 } // Request Entity Too Large
       );
     }
 
     if (tattooImageFile && tattooImageFile.size > maxSize) {
       return NextResponse.json(
-        { error: 'Imagem da tatuagem muito grande (máximo 10MB)' },
-        { status: 400 }
+        { error: 'Imagem da tatuagem muito grande (máximo 15MB). Tente comprimir a imagem ou usar uma foto menor.' },
+        { status: 413 } // Request Entity Too Large
       );
     }
 

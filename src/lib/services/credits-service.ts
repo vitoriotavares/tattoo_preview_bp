@@ -418,25 +418,51 @@ export class CreditsService {
   static async handleStripePaymentSuccess(
     session: Stripe.Checkout.Session
   ): Promise<boolean> {
+    const sessionId = session.id;
+    
     try {
-      console.log('=== CREDITS SERVICE: Processing payment ===');
+      console.log(`=== CREDITS SERVICE: Processing payment for session ${sessionId} ===`);
       const { userId, packageId, credits } = session.metadata || {};
       
-      console.log('Metadata - userId:', userId, 'packageId:', packageId, 'credits:', credits);
+      console.log(`Session ${sessionId} - Metadata:`, {
+        userId,
+        packageId, 
+        credits,
+        paymentStatus: session.payment_status,
+        paymentIntent: session.payment_intent
+      });
       
       if (!userId || !packageId || !credits) {
-        console.error('❌ Missing required metadata in Stripe session');
+        console.error(`❌ Session ${sessionId} - Missing required metadata in Stripe session`);
+        console.error(`❌ Session ${sessionId} - Full metadata:`, JSON.stringify(session.metadata));
         throw new Error('Missing required metadata in Stripe session');
       }
 
       const creditsToAdd = parseInt(credits, 10);
-      console.log('Adding credits to user:', creditsToAdd);
+      if (isNaN(creditsToAdd) || creditsToAdd <= 0) {
+        console.error(`❌ Session ${sessionId} - Invalid credits value:`, credits);
+        throw new Error(`Invalid credits value: ${credits}`);
+      }
+      
+      console.log(`Session ${sessionId} - Adding ${creditsToAdd} credits to user ${userId}`);
+      
+      // Check if we already processed this session
+      const existingPurchase = await db
+        .select()
+        .from(purchases)
+        .where(eq(purchases.stripeSessionId, sessionId))
+        .limit(1);
+      
+      if (existingPurchase.length > 0) {
+        console.log(`⚠️  Session ${sessionId} - Already processed, skipping duplicate`);
+        return true;
+      }
       
       // Create purchase record
       const purchaseId = nanoid();
-      console.log('Creating purchase record with ID:', purchaseId);
+      console.log(`Session ${sessionId} - Creating purchase record with ID: ${purchaseId}`);
       
-      await db.insert(purchases).values({
+      const purchaseData = {
         id: purchaseId,
         userId,
         packageId,
@@ -445,15 +471,18 @@ export class CreditsService {
         amount: session.amount_total?.toString() || '0',
         currency: session.currency || 'brl',
         credits: creditsToAdd,
-        status: 'completed',
+        status: 'completed' as const,
         completedAt: new Date(),
-      });
+      };
       
-      console.log('✅ Purchase record created');
+      console.log(`Session ${sessionId} - Purchase data:`, purchaseData);
+      
+      await db.insert(purchases).values(purchaseData);
+      console.log(`✅ Session ${sessionId} - Purchase record created`);
 
       // Add credits to user
       const updatedCredits = await this.addCredits(userId, creditsToAdd, purchaseId);
-      console.log('✅ Credits added. New totals:', {
+      console.log(`✅ Session ${sessionId} - Credits added successfully. New totals:`, {
         total: updatedCredits.totalCredits,
         used: updatedCredits.usedCredits,
         available: updatedCredits.availableCredits
@@ -461,7 +490,22 @@ export class CreditsService {
 
       return true;
     } catch (error) {
-      console.error('❌ Error handling Stripe payment:', error);
+      console.error(`❌ Session ${sessionId} - Critical error in handleStripePaymentSuccess:`, error);
+      console.error(`❌ Session ${sessionId} - Error stack:`, error instanceof Error ? error.stack : 'No stack');
+      console.error(`❌ Session ${sessionId} - This payment needs manual recovery!`);
+      
+      // Log all session details for manual recovery
+      console.error(`❌ Session ${sessionId} - Full session data for recovery:`, {
+        id: session.id,
+        payment_status: session.payment_status,
+        payment_intent: session.payment_intent,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        metadata: session.metadata,
+        created: session.created,
+        customer_email: session.customer_details?.email
+      });
+      
       return false;
     }
   }

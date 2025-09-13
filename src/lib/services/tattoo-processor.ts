@@ -33,25 +33,45 @@ export class TattooProcessor {
     rotation: number = 0,
     style: string = "realistic"
   ): string {
-    return `Using the provided tattoo design reference, apply it to the person's ${bodyPart} with photorealistic quality.
+    return `TATTOO TRANSFER TASK:
+You will receive TWO images:
+1. PERSON IMAGE: Shows the person where the tattoo should be applied
+2. TATTOO REFERENCE IMAGE: Shows the tattoo design on any body part
 
-Ensure:
+CRITICAL INSTRUCTION: Transfer the tattoo design from the reference image to the EXACT body part specified (${bodyPart}) on the person, regardless of where it appears in the reference image.
+
+MAPPING PROCESS:
+- DETECT: First, identify where the tattoo is located in the reference image (face, arm, leg, back, etc.)
+- EXTRACT: Carefully extract the tattoo design from its current location in the reference image
+- ADAPT: Scale, rotate, and adapt the design to fit naturally on the person's ${bodyPart}
+- APPLY: Place the tattoo on the person's ${bodyPart} with photorealistic integration
+
+CRITICAL: If the reference tattoo is on a different body part than the target (${bodyPart}), you MUST adapt the design to look natural on the ${bodyPart}. For example:
+- If reference shows face tattoo but target is ${bodyPart}, resize and adapt proportionally
+- If reference shows large back tattoo but target is ${bodyPart}, scale down appropriately
+- Always prioritize natural appearance on the target ${bodyPart} over exact replication
+
+TARGET LOCATION: ${bodyPart}
+- Size: ${size}% of the ${bodyPart} area
+- Position: ${position} of the ${bodyPart}  
+- Rotation: ${rotation} degrees following body curve
+- Style: ${style} tattoo appearance
+
+QUALITY REQUIREMENTS:
 - Natural integration with skin texture and pores
-- Proper perspective following body contours
+- Proper perspective following body contours of the ${bodyPart}
 - Realistic ink saturation as if freshly healed
 - Appropriate shadow and highlight integration
 - Seamless blending with existing skin tone
 - Preserve any natural marks like moles or freckles around the area
 
-Technical Details:
-- Size: ${size}% of the ${bodyPart} area
-- Position: ${position} of the ${bodyPart}
-- Rotation: ${rotation} degrees following body curve
-- Style: ${style} tattoo photography
+IMPORTANT NOTES:
+- Do NOT copy the placement from the reference image
+- DO copy the design and apply it to the specified ${bodyPart}
+- Maintain original aspect ratio and image proportions
+- Professional tattoo portfolio photography quality
 
-Photography Style: Professional tattoo portfolio photography, 85mm portrait lens, soft diffused lighting, macro detail shot.
-
-Important: Do not change the input aspect ratio. Maintain all original image proportions and quality.`;
+The final result should show the person with the tattoo design beautifully applied to their ${bodyPart}, regardless of where that design originally appeared in the reference image.`;
   }
 
   /**

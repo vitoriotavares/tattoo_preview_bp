@@ -40,6 +40,13 @@ export async function POST(request: NextRequest) {
     const mode = formData.get('mode') as TattooMode;
     const bodyImageFile = formData.get('bodyImage') as File;
     const tattooImageFile = formData.get('tattooImage') as File | null;
+    
+    // Parse processing options
+    const bodyPart = (formData.get('bodyPart') as string) || 'arm';
+    const size = parseInt((formData.get('size') as string) || '100');
+    const position = (formData.get('position') as string) || 'center';
+    const rotation = parseInt((formData.get('rotation') as string) || '0');
+    const style = (formData.get('style') as string) || 'realistic';
 
     // Validate required fields
     if (!mode || !bodyImageFile) {
@@ -92,10 +99,11 @@ export async function POST(request: NextRequest) {
       bodyImageBuffer,
       tattooImageBuffer,
       {
-        // Optional parameters can be added here
-        bodyPart: 'arm',
-        size: 100,
-        position: 'center'
+        bodyPart,
+        size,
+        position,
+        rotation,
+        style
       }
     );
 

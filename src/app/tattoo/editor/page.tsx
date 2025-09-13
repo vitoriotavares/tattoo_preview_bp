@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Wand2, Loader2, Download, AlertCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Wand2, Loader2, Download, AlertCircle, Settings } from "lucide-react";
 import { ImageUploader } from "@/components/tattoo/image-uploader";
 import { useCredits } from "@/hooks/use-credits";
 import { AuthGuard } from "@/components/auth/auth-guard";
@@ -38,6 +39,12 @@ function TattooEditorContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [processingError, setProcessingError] = useState<string | null>(null);
+  
+  // Processing parameters
+  const [bodyPart, setBodyPart] = useState<string>('auto');
+  const [size, setSize] = useState<number>(100);
+  const [position, setPosition] = useState<string>('center');
+  const [style, setStyle] = useState<string>('realistic');
 
   const modeConfig = {
     add: {
@@ -101,6 +108,12 @@ function TattooEditorContent() {
       if (tattooImage) {
         formData.append('tattooImage', tattooImage.file);
       }
+      
+      // Add processing parameters
+      formData.append('bodyPart', bodyPart);
+      formData.append('size', size.toString());
+      formData.append('position', position);
+      formData.append('style', style);
 
       const response = await fetch('/api/tattoo/process', {
         method: 'POST',
@@ -173,6 +186,11 @@ function TattooEditorContent() {
     setTattooImage(null);
     setResult(null);
     setProcessingError(null);
+    // Reset processing parameters
+    setBodyPart('auto');
+    setSize(100);
+    setPosition('center');
+    setStyle('realistic');
   };
 
   return (
@@ -304,6 +322,112 @@ function TattooEditorContent() {
               </Tabs>
             </CardContent>
           </Card>
+
+          {/* Configuration Section - Only show for 'add' mode */}
+          {mode === 'add' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Configurações da Tatuagem
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Body Part Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Parte do Corpo
+                    </label>
+                    <Select value={bodyPart} onValueChange={setBodyPart}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione onde aplicar a tatuagem" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">🤖 Detectar Automaticamente</SelectItem>
+                        <SelectItem value="arm">💪 Braço</SelectItem>
+                        <SelectItem value="forearm">🖐️ Antebraço</SelectItem>
+                        <SelectItem value="shoulder">🫱 Ombro</SelectItem>
+                        <SelectItem value="back">🫸 Costas</SelectItem>
+                        <SelectItem value="chest">🫶 Peito</SelectItem>
+                        <SelectItem value="leg">🦵 Perna</SelectItem>
+                        <SelectItem value="neck">🫂 Pescoço</SelectItem>
+                        <SelectItem value="hand">✋ Mão</SelectItem>
+                        <SelectItem value="face">😊 Rosto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {bodyPart === 'auto' ? 
+                        'Detectaremos automaticamente a melhor localização' : 
+                        'Tatuagem será aplicada na parte selecionada'
+                      }
+                    </p>
+                  </div>
+
+                  {/* Size Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Tamanho da Tatuagem
+                    </label>
+                    <Select value={size.toString()} onValueChange={(value) => setSize(parseInt(value))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="50">50% - Pequena</SelectItem>
+                        <SelectItem value="75">75% - Média</SelectItem>
+                        <SelectItem value="100">100% - Normal</SelectItem>
+                        <SelectItem value="125">125% - Grande</SelectItem>
+                        <SelectItem value="150">150% - Muito Grande</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Percentual da área da parte do corpo
+                    </p>
+                  </div>
+
+                  {/* Position Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Posição
+                    </label>
+                    <Select value={position} onValueChange={setPosition}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="center">Centro</SelectItem>
+                        <SelectItem value="top">Superior</SelectItem>
+                        <SelectItem value="bottom">Inferior</SelectItem>
+                        <SelectItem value="left">Esquerda</SelectItem>
+                        <SelectItem value="right">Direita</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Style Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Estilo
+                    </label>
+                    <Select value={style} onValueChange={setStyle}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="realistic">Realista</SelectItem>
+                        <SelectItem value="traditional">Tradicional</SelectItem>
+                        <SelectItem value="watercolor">Aquarela</SelectItem>
+                        <SelectItem value="tribal">Tribal</SelectItem>
+                        <SelectItem value="blackwork">Blackwork</SelectItem>
+                        <SelectItem value="minimalist">Minimalista</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Error Display */}
           {processingError && (

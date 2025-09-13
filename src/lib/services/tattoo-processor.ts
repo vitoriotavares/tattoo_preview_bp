@@ -1,4 +1,4 @@
-import { processImageWithGemini, getMimeType, bufferToBase64 } from "./gemini-client";
+import { processImageWithGemini, analyzeImagesWithGemini, getMimeType, bufferToBase64 } from "./gemini-client";
 import sharp from "sharp";
 
 export type TattooMode = 'add' | 'remove' | 'enhance';
@@ -24,6 +24,61 @@ export interface TattooProcessingResult {
 export class TattooProcessor {
   
   /**
+   * Perform conditional pre-analysis of images
+   */
+  private static async performPreAnalysis(
+    bodyImageBuffer: Buffer,
+    tattooImageBuffer?: Buffer,
+    requestedBodyPart?: string
+  ): Promise<{ bodyPart: string; analysisPerformed: boolean }> {
+    // If user specified a body part other than 'auto', use it directly
+    if (requestedBodyPart && requestedBodyPart !== 'auto') {
+      return {
+        bodyPart: requestedBodyPart,
+        analysisPerformed: false
+      };
+    }
+
+    try {
+      console.log('Performing automatic image analysis...');
+      
+      // Prepare images for analysis
+      const bodyImage = {
+        data: bufferToBase64(bodyImageBuffer),
+        mimeType: getMimeType(bodyImageBuffer)
+      };
+      
+      const tattooImage = tattooImageBuffer ? {
+        data: bufferToBase64(tattooImageBuffer),
+        mimeType: getMimeType(tattooImageBuffer)
+      } : undefined;
+
+      // Perform analysis
+      const analysisResult = await analyzeImagesWithGemini(bodyImage, tattooImage);
+      
+      if (analysisResult.success && analysisResult.bodyPartDetected) {
+        console.log(`Detected body part: ${analysisResult.bodyPartDetected}`);
+        return {
+          bodyPart: analysisResult.bodyPartDetected,
+          analysisPerformed: true
+        };
+      } else {
+        console.warn('Analysis failed, using fallback body part');
+        return {
+          bodyPart: 'arm', // fallback
+          analysisPerformed: true
+        };
+      }
+    } catch (error) {
+      console.error('Pre-analysis error:', error);
+      return {
+        bodyPart: 'arm', // fallback
+        analysisPerformed: false
+      };
+    }
+  }
+
+  /**
    * Generate optimized prompt for adding tattoo
    */
   private static generateAddTattooPrompt(
@@ -33,45 +88,40 @@ export class TattooProcessor {
     rotation: number = 0,
     style: string = "realistic"
   ): string {
-    return `TATTOO TRANSFER TASK:
-You will receive TWO images:
-1. PERSON IMAGE: Shows the person where the tattoo should be applied
-2. TATTOO REFERENCE IMAGE: Shows the tattoo design on any body part
+    return `Create a professional tattoo application photo. You have received:
 
-CRITICAL INSTRUCTION: Transfer the tattoo design from the reference image to the EXACT body part specified (${bodyPart}) on the person, regardless of where it appears in the reference image.
+FIRST IMAGE: Person's photo showing their ${bodyPart}
+SECOND IMAGE: Tattoo design reference
 
-MAPPING PROCESS:
-- DETECT: First, identify where the tattoo is located in the reference image (face, arm, leg, back, etc.)
-- EXTRACT: Carefully extract the tattoo design from its current location in the reference image
-- ADAPT: Scale, rotate, and adapt the design to fit naturally on the person's ${bodyPart}
-- APPLY: Place the tattoo on the person's ${bodyPart} with photorealistic integration
+TASK: Apply the tattoo design from the second image to the person's ${bodyPart} shown in the first image.
 
-CRITICAL: If the reference tattoo is on a different body part than the target (${bodyPart}), you MUST adapt the design to look natural on the ${bodyPart}. For example:
-- If reference shows face tattoo but target is ${bodyPart}, resize and adapt proportionally
-- If reference shows large back tattoo but target is ${bodyPart}, scale down appropriately
-- Always prioritize natural appearance on the target ${bodyPart} over exact replication
+ADVANCED COMPOSITION INSTRUCTIONS:
+1. EXTRACT the tattoo design from wherever it appears in the reference image
+2. ADAPT the design size and orientation to fit naturally on the person's ${bodyPart}
+3. APPLY with photorealistic integration matching the lighting and perspective
 
-TARGET LOCATION: ${bodyPart}
+SPECIFICATIONS:
+- Target location: ${bodyPart}
 - Size: ${size}% of the ${bodyPart} area
-- Position: ${position} of the ${bodyPart}  
-- Rotation: ${rotation} degrees following body curve
+- Position: ${position} of the ${bodyPart}
 - Style: ${style} tattoo appearance
+- Rotation: ${rotation} degrees following natural body contours
 
-QUALITY REQUIREMENTS:
-- Natural integration with skin texture and pores
-- Proper perspective following body contours of the ${bodyPart}
-- Realistic ink saturation as if freshly healed
-- Appropriate shadow and highlight integration
-- Seamless blending with existing skin tone
-- Preserve any natural marks like moles or freckles around the area
+QUALITY STANDARDS:
+✓ Natural skin texture integration with pores and fine details
+✓ Proper perspective matching body contours of the ${bodyPart}
+✓ Realistic ink saturation as if recently healed (not fresh)
+✓ Appropriate shadows and highlights matching ambient lighting
+✓ Seamless blending with existing skin tone variations
+✓ Preserve natural marks (moles, freckles, scars) around the area
 
-IMPORTANT NOTES:
-- Do NOT copy the placement from the reference image
-- DO copy the design and apply it to the specified ${bodyPart}
-- Maintain original aspect ratio and image proportions
-- Professional tattoo portfolio photography quality
+CRITICAL REQUIREMENTS:
+• DO NOT copy the placement from the reference image
+• DO copy the design and apply it to the specified ${bodyPart}
+• Maintain original image aspect ratio and proportions
+• Result should look like professional tattoo portfolio photography
 
-The final result should show the person with the tattoo design beautifully applied to their ${bodyPart}, regardless of where that design originally appeared in the reference image.`;
+Generate a high-quality, photorealistic result showing the person with the tattoo design beautifully integrated into their ${bodyPart}.`;
   }
 
   /**
@@ -151,13 +201,22 @@ Do not alter the fundamental design - only enhance and restore quality.`;
     const startTime = Date.now();
 
     try {
+      // Perform conditional pre-analysis
+      const analysis = await this.performPreAnalysis(
+        bodyImageBuffer,
+        tattooImageBuffer,
+        options.bodyPart
+      );
+
+      console.log(`Using body part: ${analysis.bodyPart} (analysis: ${analysis.analysisPerformed ? 'auto-detected' : 'user-specified'})`);
+
       // Preprocess images
       const processedBodyImage = await this.preprocessImage(bodyImageBuffer);
       const processedTattooImage = await this.preprocessImage(tattooImageBuffer);
 
-      // Generate prompt
+      // Generate prompt with detected/specified body part
       const prompt = this.generateAddTattooPrompt(
-        options.bodyPart || "arm",
+        analysis.bodyPart,
         options.size || 100,
         options.position || "center", 
         options.rotation || 0,

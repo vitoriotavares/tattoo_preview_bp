@@ -39,6 +39,17 @@ export interface ImageProcessingResult {
   isRateLimited?: boolean;
 }
 
+export interface ImageAnalysisResult {
+  success: boolean;
+  bodyPartDetected?: string;
+  tattooLocation?: string;
+  suitable?: boolean;
+  issues?: string[];
+  error?: string;
+  retryAfter?: number;
+  isRateLimited?: boolean;
+}
+
 // Helper function to wait for a specific duration
 function wait(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -71,17 +82,20 @@ export async function processImageWithGemini(
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
+      // Use Advanced Composition format: images first, then prompt
       const contents = [
         {
           role: 'user' as const,
           parts: [
-            { text: prompt },
+            // All images first
             ...images.map(img => ({
               inlineData: {
                 mimeType: img.mimeType,
                 data: img.data
               }
-            }))
+            })),
+            // Then the text prompt
+            { text: prompt }
           ],
         },
       ];
@@ -180,4 +194,115 @@ export function getMimeType(buffer: Buffer): string {
 
 export function bufferToBase64(buffer: Buffer): string {
   return buffer.toString('base64');
+}
+
+export async function analyzeImagesWithGemini(
+  bodyImage: { data: string; mimeType: string },
+  tattooImage?: { data: string; mimeType: string },
+  maxRetries: number = 2
+): Promise<ImageAnalysisResult> {
+  let lastError: Error = new Error('No error occurred');
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const contents = [
+        {
+          role: 'user' as const,
+          parts: [
+            {
+              inlineData: {
+                mimeType: bodyImage.mimeType,
+                data: bodyImage.data
+              }
+            },
+            ...(tattooImage ? [{
+              inlineData: {
+                mimeType: tattooImage.mimeType,
+                data: tattooImage.data
+              }
+            }] : []),
+            {
+              text: `Analyze these images and provide ONLY a JSON response:
+
+For the first image (person): 
+- What body part is most prominently visible and suitable for tattoo application?
+- Is the image quality good enough for tattoo processing?
+
+${tattooImage ? `For the second image (tattoo reference):
+- Where is the tattoo located on this person?
+- What is the general style of the tattoo?` : ''}
+
+Respond ONLY with JSON in this exact format:
+{
+  "bodyPartDetected": "arm|forearm|shoulder|back|chest|leg|neck|hand|face",
+  ${tattooImage ? '"tattooLocation": "specific location of existing tattoo",' : ''}
+  "suitable": true|false,
+  "issues": ["list any quality or suitability issues"],
+  "confidence": 0.0-1.0
+}
+
+No explanations, just the JSON object.`
+            }
+          ],
+        },
+      ];
+
+      const response = await geminiAI.models.generateContent({
+        model: MODEL_NAME,
+        config: {
+          responseModalities: ['TEXT'], // Text-only response for analysis
+        },
+        contents,
+      });
+
+      const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      try {
+        // Parse JSON response
+        const analysis = JSON.parse(textResponse.trim());
+        
+        return {
+          success: true,
+          bodyPartDetected: analysis.bodyPartDetected,
+          tattooLocation: analysis.tattooLocation,
+          suitable: analysis.suitable,
+          issues: analysis.issues || [],
+        };
+      } catch (parseError) {
+        console.error('Failed to parse analysis JSON:', textResponse);
+        throw new Error('Invalid JSON response from analysis');
+      }
+
+    } catch (error: unknown) {
+      lastError = error as Error;
+      console.error(`Gemini Analysis Error (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
+      
+      // Check if it's a rate limit error
+      const errorObj = error as { status?: number; code?: number };
+      if (errorObj.status === 429 || errorObj.code === 429) {
+        const retryDelay = parseRetryDelay(lastError);
+        
+        if (attempt < maxRetries) {
+          console.log(`Analysis rate limited. Waiting ${retryDelay} seconds before retry...`);
+          await wait(retryDelay * 1000);
+          continue;
+        } else {
+          return {
+            success: false,
+            error: 'Cota da API excedida para análise. Tente novamente em alguns minutos.',
+            isRateLimited: true,
+            retryAfter: retryDelay,
+          };
+        }
+      }
+      
+      // For non-rate-limit errors, don't retry
+      break;
+    }
+  }
+
+  return {
+    success: false,
+    error: lastError instanceof Error ? lastError.message : 'Erro desconhecido na análise das imagens',
+  };
 }

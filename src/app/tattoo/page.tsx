@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "@/hooks/use-session";
 import { signIn } from "@/lib/auth-client";
+import { Compare } from "@/components/ui/compare";
 
 type TattooMode = 'add' | 'remove' | 'enhance';
 
@@ -220,24 +221,70 @@ export default function TattooPage() {
       <div className="text-center">
         <h3 className="text-xl font-semibold mb-4">Exemplos de Resultados</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {modes.map((mode, index) => (
-            <div key={mode.id} className="relative group">
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                {mode.icon}
-                <span className="ml-2 text-sm text-muted-foreground">
-                  Exemplo {mode.title}
-                </span>
+          {/* Exemplo Adicionar Tatuagem */}
+          <div className="relative group">
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <Badge className="absolute top-2 left-2 text-xs z-10">
+                  Adicionar Tatuagem
+                </Badge>
+                <Compare
+                  firstImage="/images/mulher1_clear.png"
+                  secondImage="/images/mulher1_pb.png"
+                  className="w-full h-48 rounded-none"
+                  firstImageClassName="object-cover"
+                  secondImageClassname="object-cover"
+                  slideMode="hover"
+                  showHandlebar={true}
+                  autoplay={true}
+                />
               </div>
-              <Badge 
-                variant="secondary" 
-                className="absolute top-2 left-2 text-xs"
-              >
-                {mode.title}
-              </Badge>
-            </div>
-          ))}
+            </Card>
+          </div>
+
+          {/* Exemplo Remover Tatuagem */}
+          <div className="relative group">
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <Badge className="absolute top-2 left-2 text-xs z-10">
+                  Remover Tatuagem
+                </Badge>
+                <Compare
+                  firstImage="/images/mulher2_pb.png"
+                  secondImage="/images/mulher2_clear.png"
+                  className="w-full h-48 rounded-none"
+                  firstImageClassName="object-cover"
+                  secondImageClassname="object-cover"
+                  slideMode="hover"
+                  showHandlebar={true}
+                  autoplay={true}
+                />
+              </div>
+            </Card>
+          </div>
+
+          {/* Exemplo Retocar Tatuagem */}
+          <div className="relative group">
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <Badge className="absolute top-2 left-2 text-xs z-10">
+                  Retocar Tatuagem
+                </Badge>
+                <Compare
+                  firstImage="/images/mulher1_pb.png"
+                  secondImage="/images/mulher1_color.png"
+                  className="w-full h-48 rounded-none"
+                  firstImageClassName="object-cover"
+                  secondImageClassname="object-cover"
+                  slideMode="hover"
+                  showHandlebar={true}
+                  autoplay={true}
+                />
+              </div>
+            </Card>
+          </div>
         </div>
-        
+
         <p className="text-sm text-muted-foreground">
           Resultados com qualidade fotorrealista em poucos segundos
         </p>

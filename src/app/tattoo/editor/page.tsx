@@ -40,7 +40,8 @@ function TattooEditorContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [processingError, setProcessingError] = useState<string | null>(null);
-  
+  const [activeTab, setActiveTab] = useState<string>(mode === 'add' ? 'tattoo' : 'body');
+
   // Processing parameters
   const [bodyPart, setBodyPart] = useState<string>('auto');
   const [size, setSize] = useState<number>(100);
@@ -76,7 +77,11 @@ function TattooEditorContent() {
 
   const handleTattooImageSelect = useCallback((file: File, preview: string) => {
     setTattooImage({ file, preview });
-  }, []);
+    // Auto-switch to body tab after tattoo upload in 'add' mode
+    if (mode === 'add') {
+      setTimeout(() => setActiveTab('body'), 500);
+    }
+  }, [mode]);
 
   const handleBodyImageRemove = useCallback(() => {
     setBodyImage(null);
@@ -205,6 +210,8 @@ function TattooEditorContent() {
     setTattooImage(null);
     setResult(null);
     setProcessingError(null);
+    // Reset active tab for 'add' mode
+    setActiveTab(mode === 'add' ? 'tattoo' : 'body');
     // Reset processing parameters
     setBodyPart('auto');
     setSize(100);
@@ -298,45 +305,86 @@ function TattooEditorContent() {
               <CardTitle>Upload de Imagens</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="body" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="body">
-                    Foto do Corpo
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="tattoo" 
-                    disabled={!config.needsTattooImage}
-                  >
-                    {config.needsTattooImage ? "Tatuagem" : "Não Necessário"}
-                  </TabsTrigger>
+                  {mode === 'add' ? (
+                    <>
+                      <TabsTrigger value="tattoo">
+                        Design da Tatuagem
+                      </TabsTrigger>
+                      <TabsTrigger value="body">
+                        Foto do Corpo
+                      </TabsTrigger>
+                    </>
+                  ) : (
+                    <>
+                      <TabsTrigger value="body">
+                        Foto do Corpo
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="tattoo"
+                        disabled={!config.needsTattooImage}
+                      >
+                        {config.needsTattooImage ? "Tatuagem" : "Não Necessário"}
+                      </TabsTrigger>
+                    </>
+                  )}
                 </TabsList>
                 
-                <TabsContent value="body" className="mt-4">
-                  <ImageUploader
-                    label="Foto do Corpo"
-                    description={
-                      mode === 'add' 
-                        ? "Faça upload da foto onde deseja aplicar a tatuagem"
-                        : "Faça upload da foto com a tatuagem existente"
-                    }
-                    onImageSelect={handleBodyImageSelect}
-                    onImageRemove={handleBodyImageRemove}
-                    currentImage={bodyImage?.preview}
-                    required
-                  />
-                </TabsContent>
-                
-                {config.needsTattooImage && (
-                  <TabsContent value="tattoo" className="mt-4">
-                    <ImageUploader
-                      label="Design da Tatuagem"
-                      description="Faça upload do design que deseja aplicar na foto do corpo"
-                      onImageSelect={handleTattooImageSelect}
-                      onImageRemove={handleTattooImageRemove}
-                      currentImage={tattooImage?.preview}
-                      required
-                    />
-                  </TabsContent>
+                {mode === 'add' ? (
+                  <>
+                    <TabsContent value="tattoo" className="mt-4">
+                      <ImageUploader
+                        label="Design da Tatuagem"
+                        description="Primeiro, faça upload do design que deseja aplicar"
+                        onImageSelect={handleTattooImageSelect}
+                        onImageRemove={handleTattooImageRemove}
+                        currentImage={tattooImage?.preview}
+                        required
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="body" className="mt-4">
+                      <ImageUploader
+                        label="Foto do Corpo"
+                        description="Agora, faça upload da foto onde deseja aplicar a tatuagem"
+                        onImageSelect={handleBodyImageSelect}
+                        onImageRemove={handleBodyImageRemove}
+                        currentImage={bodyImage?.preview}
+                        required
+                      />
+                    </TabsContent>
+                  </>
+                ) : (
+                  <>
+                    <TabsContent value="body" className="mt-4">
+                      <ImageUploader
+                        label="Foto do Corpo"
+                        description={
+                          mode === 'remove'
+                            ? "Faça upload da foto com a tatuagem existente"
+                            : "Faça upload da foto com a tatuagem a ser retocada"
+                        }
+                        onImageSelect={handleBodyImageSelect}
+                        onImageRemove={handleBodyImageRemove}
+                        currentImage={bodyImage?.preview}
+                        required
+                      />
+                    </TabsContent>
+
+                    {config.needsTattooImage && (
+                      <TabsContent value="tattoo" className="mt-4">
+                        <ImageUploader
+                          label="Design da Tatuagem"
+                          description="Faça upload do design que deseja aplicar na foto do corpo"
+                          onImageSelect={handleTattooImageSelect}
+                          onImageRemove={handleTattooImageRemove}
+                          currentImage={tattooImage?.preview}
+                          required
+                        />
+                      </TabsContent>
+                    )}
+                  </>
                 )}
               </Tabs>
             </CardContent>
@@ -471,7 +519,7 @@ function TattooEditorContent() {
             <CardContent className="space-y-4">
               <div className="text-center">
                 <p className="text-muted-foreground mb-6">
-                  Utilizamos o Google Gemini 2.5 Flash Image Preview para resultados fotorrealistas
+                  Utilizamos o IA de última geração para resultados fotorrealistas
                 </p>
                 
                 <Button 
@@ -518,7 +566,6 @@ function TattooEditorContent() {
                       <p>• Tempo estimado: poucos segundos</p>
                       <p>• Qualidade: Fotorrealista com IA avançada</p>
                       <p>• Custo: 1 crédito por processamento</p>
-                      <p className="text-green-600">🛡️ Sistema seguro - sem perdas de créditos</p>
                     </>
                   )}
                 </div>

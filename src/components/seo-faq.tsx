@@ -18,7 +18,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: "Quanto tempo demora para ver o resultado?",
-    answer: "Poucos segundos! Nossa IA Google Gemini 2.5 Flash processa instantaneamente.",
+    answer: "Poucos segundos! Nossa IA processa instantaneamente.",
     keywords: ["tempo", "rápido", "poucos segundos"]
   },
   {

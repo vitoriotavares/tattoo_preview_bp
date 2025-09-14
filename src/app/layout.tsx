@@ -29,7 +29,7 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "TattooPreview - Teste Tatuagem em Poucos Segundos | IA Grátis",
   description:
-    "3 testes grátis! Veja como fica a tatuagem em você. Upload foto → Escolha design → Resultado em segundos com IA Google Gemini 2.5 Flash ✨",
+    "3 testes grátis! Veja como fica a tatuagem em você. Upload foto → Escolha design → Resultado em segundos com IA ✨",
   keywords: "testar tatuagem, simulador tatuagem grátis, como fica tatuagem, app tatuagem foto, tatuagem virtual",
   openGraph: {
     title: "TattooPreview - Teste Tatuagem em 10 Segundos",

@@ -266,9 +266,6 @@ export function ImageUploader({
                   <p className="text-xs text-muted-foreground">
                     Formatos: {accept.map(type => type.split('/')[1].toUpperCase()).join(', ')} • Máximo {maxSize}MB
                   </p>
-                  <p className="text-xs text-green-600 font-medium">
-                    📱 Fotos de câmera são comprimidas automaticamente
-                  </p>
                 </div>
 
                 <Button 

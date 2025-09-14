@@ -15,7 +15,7 @@ export function SeoSchema() {
     },
     "featureList": [
       "Simulação fotorrealista de tatuagem",
-      "IA Google Gemini 2.5 Flash",
+      "IA Google Nano Banana",
       "Resultado em poucos segundos",
       "3 testes gratuitos",
       "Sem necessidade de cadastro",

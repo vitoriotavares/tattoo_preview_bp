@@ -143,7 +143,7 @@ export default function CreditsPage() {
           <div>
             <h4 className="font-medium mb-1">Qual a qualidade dos resultados?</h4>
             <p className="text-sm text-muted-foreground">
-              Utilizamos o Google Gemini 2.5 Flash Image Preview para resultados fotorrealistas.
+              Utilizamos IA de ultima geração para resultados fotorrealistas.
             </p>
           </div>
         </CardContent>

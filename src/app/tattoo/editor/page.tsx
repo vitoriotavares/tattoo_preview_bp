@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Wand2, Loader2, Download, AlertCircle, Settings } from "lucide-react";
+import { ArrowLeft, Wand2, Loader2, Download, Settings } from "lucide-react";
 import { ImageUploader } from "@/components/tattoo/image-uploader";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { useCredits } from "@/hooks/use-credits";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import Link from "next/link";
@@ -142,6 +143,18 @@ function TattooEditorContent() {
           } catch {
             setProcessingError('Cota da API excedida. Aguarde alguns minutos antes de tentar novamente.');
           }
+        } else if (response.status === 500) {
+          // Server error - provide friendly message
+          try {
+            await response.json();
+            setProcessingError(
+              '⚠️ Nossos servidores estão com alta demanda no momento. Tente novamente em alguns minutos - seus créditos não foram consumidos!'
+            );
+          } catch {
+            setProcessingError(
+              '⚠️ Nossos servidores estão temporariamente indisponíveis. Tente novamente em alguns minutos!'
+            );
+          }
         } else {
           try {
             const errorData = await response.json();
@@ -162,7 +175,13 @@ function TattooEditorContent() {
       
     } catch (error) {
       console.error('Erro no processamento:', error);
-      setProcessingError('Erro na conexão. Verifique sua internet e tente novamente.');
+
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setProcessingError('🌐 Problema de conexão. Verifique sua internet e tente novamente.');
+      } else {
+        setProcessingError('⚠️ Algo deu errado! Nossos servidores podem estar sobrecarregados. Tente novamente em alguns minutos.');
+      }
     } finally {
       setIsProcessing(false);
       // Stop polling when processing is done
@@ -431,19 +450,14 @@ function TattooEditorContent() {
 
           {/* Error Display */}
           {processingError && (
-            <Card className="border-destructive bg-destructive/10">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-destructive mb-1">Erro no Processamento</h4>
-                    <p className="text-sm text-destructive/80">
-                      {processingError}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ErrorAlert
+              error={processingError}
+              onRetry={() => {
+                setProcessingError(null);
+                handleProcess();
+              }}
+              isRetrying={isProcessing}
+            />
           )}
 
           {/* Process Section */}
@@ -501,7 +515,7 @@ function TattooEditorContent() {
                     </>
                   ) : (
                     <>
-                      <p>• Tempo estimado: 5-10 segundos</p>
+                      <p>• Tempo estimado: poucos segundos</p>
                       <p>• Qualidade: Fotorrealista com IA avançada</p>
                       <p>• Custo: 1 crédito por processamento</p>
                       <p className="text-green-600">🛡️ Sistema seguro - sem perdas de créditos</p>

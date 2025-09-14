@@ -148,9 +148,26 @@ export async function POST(request: NextRequest) {
       // Continue anyway since image was processed successfully - user gets the image
     }
 
+    // Validate image buffer exists
+    if (!processingResult.imageBuffer) {
+      // Rollback credit reservation if no image buffer
+      if (reservationId) {
+        try {
+          await CreditsService.rollbackCreditReservation(userId, reservationId);
+        } catch (rollbackError) {
+          console.error('Error rolling back credit reservation:', rollbackError);
+        }
+      }
+
+      return NextResponse.json(
+        { error: 'Erro no processamento: imagem não gerada' },
+        { status: 500 }
+      );
+    }
+
     // Return the processed image
-    const imageBuffer = processingResult.imageBuffer!;
-    
+    const imageBuffer = processingResult.imageBuffer;
+
     return new Response(new Uint8Array(imageBuffer), {
       headers: {
         'Content-Type': processingResult.mimeType || 'image/png',

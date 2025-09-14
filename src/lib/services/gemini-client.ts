@@ -116,17 +116,31 @@ export async function processImageWithGemini(
         }
 
         const parts = chunk.candidates[0].content.parts;
-        
+
         for (const part of parts) {
           if (part.inlineData) {
             // Image response
+            console.log('Received image data from Gemini API');
             imageBuffer = Buffer.from(part.inlineData.data || '', 'base64');
             imageMimeType = part.inlineData.mimeType;
+            console.log(`Image buffer size: ${imageBuffer.length} bytes, MIME: ${imageMimeType}`);
           } else if (part.text) {
             // Text response
             textResponse += part.text;
+            console.log('Received text response from Gemini API:', part.text.substring(0, 100));
           }
         }
+      }
+
+      console.log(`Processing complete. Image buffer: ${imageBuffer ? 'present' : 'missing'}, Text response: ${textResponse ? 'present' : 'missing'}`);
+
+      // Validate that we got an image response
+      if (!imageBuffer) {
+        return {
+          success: false,
+          error: 'API não retornou imagem processada. Tente novamente ou use uma imagem diferente.',
+          textResponse: textResponse || undefined,
+        };
       }
 
       return {

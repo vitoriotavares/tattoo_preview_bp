@@ -76,7 +76,7 @@ export default function CreditsPage() {
           <CardContent className="p-4 text-center">
             <Zap className="h-8 w-8 mx-auto mb-2 text-primary" />
             <h3 className="font-semibold text-sm">Processamento Rápido</h3>
-            <p className="text-xs text-muted-foreground">Resultados em 10s</p>
+            <p className="text-xs text-muted-foreground">Resultados em poucos segundos</p>
           </CardContent>
         </Card>
         

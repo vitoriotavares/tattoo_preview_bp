@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Star, Zap, ArrowRight } from "lucide-react";
 import { Compare } from "@/components/ui/compare";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import { SeoFaq } from "@/components/seo-faq";
 
 export default function LandingPage() {
 
@@ -30,11 +31,11 @@ export default function LandingPage() {
             </button>
             
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-              Remova Tatuagens com IA
+              Teste Sua Tatuagem em Poucos Segundos
             </h1>
-            
+
             <h2 className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Resultado fotorrealista. Gratuito para testar.
+              3 testes grátis • Resultado fotorrealista • Sem cadastro
             </h2>
           </div>
 
@@ -42,7 +43,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center pt-6">
             <Button asChild size="lg" className="min-w-[240px] text-base">
               <Link href="/tattoo">
-                Testar Grátis
+                Testar Agora (3 Grátis)
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -111,7 +112,7 @@ export default function LandingPage() {
                       </Link>
                     </Button>
                     <p className="text-sm text-muted-foreground mt-3">
-                      Teste gratuito • Resultado em 10 segundos
+                      Teste gratuito • Resultado em poucos segundos
                     </p>
                   </div>
                 </div>
@@ -121,21 +122,24 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <SeoFaq />
+
       {/* Final CTA - Simplified */}
       <section className="py-16 bg-gradient-to-b from-muted/20 to-background">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-xl mx-auto space-y-6">
             <h3 className="text-3xl md:text-4xl font-bold">
-              Pronto para Começar?
+              Pronto para Testar Sua Tatuagem?
             </h3>
             <p className="text-muted-foreground text-lg">
-              Teste gratuito • Sem cartão necessário
+              3 testes gratuitos • Resultado em poucos segundos
             </p>
-            
+
             <Button asChild size="lg" className="min-w-[280px] text-lg">
               <Link href="/tattoo">
                 <Star className="mr-2 h-5 w-5" />
-                Testar Agora
+                Começar Agora (Grátis)
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

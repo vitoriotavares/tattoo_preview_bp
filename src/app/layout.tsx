@@ -5,6 +5,7 @@ import { Oswald, Merriweather, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { SeoSchema } from "@/components/seo-schema";
 
 const oswald = Oswald({
   variable: "--font-sans",
@@ -26,9 +27,21 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "TattooPreview - AI Tattoo Visualization",
+  title: "TattooPreview - Teste Tatuagem em Poucos Segundos | IA Grátis",
   description:
-    "Experimente tatuagens virtualmente com qualidade fotorrealista usando Google Gemini 2.5 Flash Image Preview. Adicione, remova ou retoque tatuagens com IA avançada.",
+    "3 testes grátis! Veja como fica a tatuagem em você. Upload foto → Escolha design → Resultado em segundos com IA Google Gemini 2.5 Flash ✨",
+  keywords: "testar tatuagem, simulador tatuagem grátis, como fica tatuagem, app tatuagem foto, tatuagem virtual",
+  openGraph: {
+    title: "TattooPreview - Teste Tatuagem em 10 Segundos",
+    description: "3 testes grátis! Veja como fica a tatuagem em você. Resultado em segundos com IA.",
+    type: "website",
+    locale: "pt_BR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TattooPreview - Teste Tatuagem em 10 Segundos",
+    description: "3 testes grátis! Veja como fica a tatuagem em você. Resultado em segundos com IA.",
+  },
 };
 
 export default function RootLayout({
@@ -37,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${oswald.variable} ${merriweather.variable} ${firaCode.variable} font-sans antialiased`}
       >
@@ -47,6 +60,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <SeoSchema />
           <QueryProvider>
             <SiteHeader />
             {children}

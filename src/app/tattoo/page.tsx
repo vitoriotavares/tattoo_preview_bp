@@ -239,7 +239,7 @@ export default function TattooPage() {
         </div>
         
         <p className="text-sm text-muted-foreground">
-          Resultados com qualidade fotorrealista em menos de 10 segundos
+          Resultados com qualidade fotorrealista em poucos segundos
         </p>
       </div>
     </div>

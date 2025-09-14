@@ -241,15 +241,27 @@ Do not alter the fundamental design - only enhance and restore quality.`;
       const processingTimeMs = Date.now() - startTime;
 
       if (!result.success) {
+        console.error('Gemini processing failed:', result.error);
         return {
           success: false,
-          error: result.error,
+          error: result.error || 'Erro no processamento da IA',
           processingTimeMs,
           isRateLimited: result.isRateLimited,
           retryAfter: result.retryAfter
         };
       }
 
+      // Additional validation for successful response
+      if (!result.imageBuffer) {
+        console.error('Gemini returned success but no image buffer');
+        return {
+          success: false,
+          error: 'Processamento incompleto: imagem não gerada pela IA',
+          processingTimeMs
+        };
+      }
+
+      console.log(`Image processing completed successfully in ${processingTimeMs}ms`);
       return {
         success: true,
         imageBuffer: result.imageBuffer,
@@ -296,15 +308,27 @@ Do not alter the fundamental design - only enhance and restore quality.`;
       const processingTimeMs = Date.now() - startTime;
 
       if (!result.success) {
+        console.error('Gemini processing failed:', result.error);
         return {
           success: false,
-          error: result.error,
+          error: result.error || 'Erro no processamento da IA',
           processingTimeMs,
           isRateLimited: result.isRateLimited,
           retryAfter: result.retryAfter
         };
       }
 
+      // Additional validation for successful response
+      if (!result.imageBuffer) {
+        console.error('Gemini returned success but no image buffer');
+        return {
+          success: false,
+          error: 'Processamento incompleto: imagem não gerada pela IA',
+          processingTimeMs
+        };
+      }
+
+      console.log(`Image processing completed successfully in ${processingTimeMs}ms`);
       return {
         success: true,
         imageBuffer: result.imageBuffer,
@@ -351,15 +375,27 @@ Do not alter the fundamental design - only enhance and restore quality.`;
       const processingTimeMs = Date.now() - startTime;
 
       if (!result.success) {
+        console.error('Gemini processing failed:', result.error);
         return {
           success: false,
-          error: result.error,
+          error: result.error || 'Erro no processamento da IA',
           processingTimeMs,
           isRateLimited: result.isRateLimited,
           retryAfter: result.retryAfter
         };
       }
 
+      // Additional validation for successful response
+      if (!result.imageBuffer) {
+        console.error('Gemini returned success but no image buffer');
+        return {
+          success: false,
+          error: 'Processamento incompleto: imagem não gerada pela IA',
+          processingTimeMs
+        };
+      }
+
+      console.log(`Image processing completed successfully in ${processingTimeMs}ms`);
       return {
         success: true,
         imageBuffer: result.imageBuffer,

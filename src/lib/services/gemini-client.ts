@@ -210,6 +210,40 @@ export function bufferToBase64(buffer: Buffer): string {
   return buffer.toString('base64');
 }
 
+// Fallback function to extract analysis from non-JSON text responses
+function extractAnalysisFromText(textResponse: string): ImageAnalysisResult | null {
+  try {
+    const text = textResponse.toLowerCase();
+
+    // Try to detect body part mentions
+    const bodyParts = ['arm', 'forearm', 'shoulder', 'back', 'chest', 'leg', 'neck', 'hand', 'face'];
+    const detectedBodyPart = bodyParts.find(part => text.includes(part));
+
+    // Try to detect suitability
+    const isSuitable = text.includes('suitable') || text.includes('good') || text.includes('appropriate');
+    const isNotSuitable = text.includes('not suitable') || text.includes('poor') || text.includes('inappropriate');
+
+    // Extract issues
+    const issues = [];
+    if (text.includes('blurry') || text.includes('blur')) issues.push('Image is blurry');
+    if (text.includes('dark') || text.includes('lighting')) issues.push('Poor lighting');
+    if (text.includes('quality')) issues.push('Image quality concerns');
+
+    if (detectedBodyPart) {
+      return {
+        success: true,
+        bodyPartDetected: detectedBodyPart,
+        suitable: isSuitable && !isNotSuitable,
+        issues,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function analyzeImagesWithGemini(
   bodyImage: { data: string; mimeType: string },
   tattooImage?: { data: string; mimeType: string },
@@ -236,9 +270,11 @@ export async function analyzeImagesWithGemini(
               }
             }] : []),
             {
-              text: `Analyze these images and provide ONLY a JSON response:
+              text: `IMPORTANT: You must respond with ONLY valid JSON. No text before or after the JSON.
 
-For the first image (person): 
+Analyze these images:
+
+For the first image (person):
 - What body part is most prominently visible and suitable for tattoo application?
 - Is the image quality good enough for tattoo processing?
 
@@ -246,16 +282,17 @@ ${tattooImage ? `For the second image (tattoo reference):
 - Where is the tattoo located on this person?
 - What is the general style of the tattoo?` : ''}
 
-Respond ONLY with JSON in this exact format:
+Respond with ONLY this exact JSON format (no markdown, no code blocks, no explanations):
+
 {
-  "bodyPartDetected": "arm|forearm|shoulder|back|chest|leg|neck|hand|face",
-  ${tattooImage ? '"tattooLocation": "specific location of existing tattoo",' : ''}
-  "suitable": true|false,
-  "issues": ["list any quality or suitability issues"],
-  "confidence": 0.0-1.0
+  "bodyPartDetected": "arm",
+  ${tattooImage ? '"tattooLocation": "specific location",' : ''}
+  "suitable": true,
+  "issues": [],
+  "confidence": 0.9
 }
 
-No explanations, just the JSON object.`
+Replace values appropriately. bodyPartDetected must be one of: arm, forearm, shoulder, back, chest, leg, neck, hand, face`
             }
           ],
         },
@@ -272,9 +309,33 @@ No explanations, just the JSON object.`
       const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
       
       try {
+        // Clean and validate the response before parsing
+        const cleanedResponse = textResponse.trim();
+        console.log('Raw Gemini analysis response:', cleanedResponse);
+
+        // Check if response looks like JSON
+        if (!cleanedResponse.startsWith('{') || !cleanedResponse.endsWith('}')) {
+          console.error('Response does not appear to be JSON:', cleanedResponse);
+          throw new Error(`Invalid response format: Expected JSON but got: ${cleanedResponse.substring(0, 200)}...`);
+        }
+
+        // Try to extract JSON from potential markdown code block
+        let jsonString = cleanedResponse;
+        const jsonBlockMatch = cleanedResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (jsonBlockMatch) {
+          jsonString = jsonBlockMatch[1].trim();
+          console.log('Extracted JSON from code block:', jsonString);
+        }
+
         // Parse JSON response
-        const analysis = JSON.parse(textResponse.trim());
-        
+        const analysis = JSON.parse(jsonString);
+
+        // Validate required fields
+        if (!analysis.bodyPartDetected || typeof analysis.suitable !== 'boolean') {
+          console.error('Missing required fields in analysis:', analysis);
+          throw new Error('Analysis response missing required fields');
+        }
+
         return {
           success: true,
           bodyPartDetected: analysis.bodyPartDetected,
@@ -283,8 +344,17 @@ No explanations, just the JSON object.`
           issues: analysis.issues || [],
         };
       } catch (parseError) {
-        console.error('Failed to parse analysis JSON:', textResponse);
-        throw new Error('Invalid JSON response from analysis');
+        console.error('Failed to parse analysis JSON. Raw response:', textResponse);
+        console.error('Parse error:', parseError);
+
+        // Fallback: try to extract basic information from text response
+        const fallbackAnalysis = extractAnalysisFromText(textResponse);
+        if (fallbackAnalysis) {
+          console.log('Using fallback analysis:', fallbackAnalysis);
+          return fallbackAnalysis;
+        }
+
+        throw new Error(`Invalid JSON response from analysis: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
       }
 
     } catch (error: unknown) {

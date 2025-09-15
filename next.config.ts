@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
   },
   // Security headers
   async headers() {
-    return [
+    const headers = [
       {
         source: '/(.*)',
         headers: [
@@ -80,17 +80,22 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        // HTTPS enforcement (only in production)
+    ];
+
+    // Add production-only headers
+    if (process.env.NODE_ENV === 'production') {
+      headers.push({
         source: '/(.*)',
-        headers: process.env.NODE_ENV === 'production' ? [
+        headers: [
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
           },
-        ] : [],
-      },
-    ];
+        ],
+      });
+    }
+
+    return headers;
   },
   // API routes timeout
   async rewrites() {

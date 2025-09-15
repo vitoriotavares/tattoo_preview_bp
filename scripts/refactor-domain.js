@@ -7,7 +7,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { glob } = require('glob');
 
 // Colors for console output
 const colors = {
@@ -65,44 +64,71 @@ class DomainRefactor {
     }
   }
 
-  // Get files to process
-  async getFilesToProcess() {
+  // Get files to process using native fs
+  getFilesToProcess() {
     log.step('Identificando arquivos para processar...');
 
-    const patterns = [
-      'src/**/*.{ts,tsx,js,jsx}',
-      'src/**/*.md',
-      '*.md',
-      'public/**/*.html',
-      'docs/**/*.md'
+    const allFiles = [];
+
+    // Define directories to search
+    const searchDirs = [
+      'src',
+      'docs',
+      'public'
     ];
 
-    const excludePatterns = [
-      'node_modules/**',
-      '.next/**',
-      'dist/**',
-      'build/**',
-      '.git/**',
-      'scripts/**',
-      'config/**'
-    ];
+    // Define file extensions to process
+    const extensions = ['.ts', '.tsx', '.js', '.jsx', '.md', '.html'];
 
-    let allFiles = [];
-
-    for (const pattern of patterns) {
+    // Recursively search directories
+    const searchDirectory = (dir) => {
       try {
-        const files = await glob(pattern, {
-          cwd: this.projectRoot,
-          ignore: excludePatterns
-        });
-        allFiles = [...allFiles, ...files];
-      } catch (error) {
-        log.warning(`Erro ao buscar arquivos com padrão ${pattern}: ${error.message}`);
-      }
-    }
+        const fullPath = path.join(this.projectRoot, dir);
+        if (!fs.existsSync(fullPath)) return;
 
-    // Remove duplicates
-    allFiles = [...new Set(allFiles)];
+        const items = fs.readdirSync(fullPath);
+
+        for (const item of items) {
+          const itemPath = path.join(fullPath, item);
+          const relativePath = path.relative(this.projectRoot, itemPath);
+
+          // Skip excluded directories
+          if (item === 'node_modules' || item === '.next' || item === '.git' ||
+              item === 'dist' || item === 'build' || item === 'scripts' ||
+              item === 'config') {
+            continue;
+          }
+
+          const stat = fs.statSync(itemPath);
+
+          if (stat.isDirectory()) {
+            searchDirectory(relativePath);
+          } else if (stat.isFile()) {
+            const ext = path.extname(item);
+            if (extensions.includes(ext)) {
+              allFiles.push(relativePath);
+            }
+          }
+        }
+      } catch (error) {
+        log.warning(`Erro ao buscar em ${dir}: ${error.message}`);
+      }
+    };
+
+    // Search in defined directories
+    searchDirs.forEach(searchDirectory);
+
+    // Also check root MD files
+    try {
+      const rootItems = fs.readdirSync(this.projectRoot);
+      rootItems.forEach(item => {
+        if (item.endsWith('.md') && !item.startsWith('.')) {
+          allFiles.push(item);
+        }
+      });
+    } catch (error) {
+      log.warning(`Erro ao buscar arquivos na raiz: ${error.message}`);
+    }
 
     log.success(`${allFiles.length} arquivos identificados`);
     return allFiles;
@@ -135,7 +161,6 @@ class DomainRefactor {
     // Processing type specific replacements
     const processingType = this.config.processingType;
     if (this.mappings && this.mappings.domains[processingType]) {
-      const domainConfig = this.mappings.domains[processingType];
       const concepts = this.mappings.commonReplacements.concepts[processingType];
 
       if (concepts) {
@@ -179,7 +204,7 @@ class DomainRefactor {
   }
 
   // Process a single file
-  async processFile(filePath, replacements) {
+  processFile(filePath, replacements) {
     const fullPath = path.join(this.projectRoot, filePath);
 
     try {
@@ -244,9 +269,37 @@ class DomainRefactor {
     }
   }
 
+  // Find TypeScript files in directory
+  findTsFiles(dir) {
+    const files = [];
+    const searchDir = (currentDir) => {
+      try {
+        const fullPath = path.join(this.projectRoot, currentDir);
+        if (!fs.existsSync(fullPath)) return;
+
+        const items = fs.readdirSync(fullPath);
+        for (const item of items) {
+          const itemPath = path.join(fullPath, item);
+          const relativePath = path.relative(this.projectRoot, itemPath);
+
+          if (fs.statSync(itemPath).isDirectory()) {
+            searchDir(relativePath);
+          } else if (item.endsWith('.ts') || item.endsWith('.tsx')) {
+            files.push(relativePath);
+          }
+        }
+      } catch (error) {
+        // Ignore errors
+      }
+    };
+
+    searchDir(dir);
+    return files;
+  }
+
   // Update processor imports
-  async updateProcessorImports() {
-    const files = await glob('src/**/*.{ts,tsx}', { cwd: this.projectRoot });
+  updateProcessorImports() {
+    const files = this.findTsFiles('src');
     const oldImport = 'tattoo-processor';
     const newImport = `${this.config.processingType}-processor`;
     const oldClass = 'TattooProcessor';
@@ -330,7 +383,7 @@ class DomainRefactor {
   }
 
   // Main execution
-  async run() {
+  run() {
     console.log(`${colors.purple}`);
     console.log('╔════════════════════════════════════════╗');
     console.log('║        DOMAIN REFACTOR SCRIPT          ║');
@@ -341,13 +394,13 @@ class DomainRefactor {
     try {
       this.loadConfig();
 
-      const files = await this.getFilesToProcess();
+      const files = this.getFilesToProcess();
       const replacements = this.buildReplacements();
 
       log.step('Processando arquivos...');
 
       for (const file of files) {
-        await this.processFile(file, replacements);
+        this.processFile(file, replacements);
       }
 
       this.renameProcessorFile();

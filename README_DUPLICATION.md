@@ -4,34 +4,44 @@ Sistema completo para transformar este app de tatuagem em qualquer outro app de 
 
 ## 🚀 Quick Start
 
+### Opção A: Cópia Externa (Recomendado)
 ```bash
 # 1. Configure seu app
 cp config/app.config.template.json config/app.config.json
 # Edite config/app.config.json com suas configurações
 
-# 2. Execute a duplicação
-./scripts/duplicate-app.sh
+# 2. Crie cópia externa
+./scripts/clone-and-duplicate.sh ../meu-novo-app
 
-# 3. Configure ambiente
-cp .env.template .env
-# Configure suas chaves de API no .env
+# 3. Vá para o novo projeto
+cd ../meu-novo-app
 
-# 4. Teste localmente
+# 4. Configure e teste
 pnpm install
 pnpm run db:migrate
 pnpm run dev
+```
 
-# 5. Valide antes do deploy
-./scripts/validate-deployment.sh
+### Opção B: Transformação Local
+```bash
+# 1. Configure seu app
+cp config/app.config.template.json config/app.config.json
 
-# 6. Deploy!
+# 2. Transforme projeto atual
+./scripts/duplicate-app.sh
+
+# 3. Teste localmente
+pnpm install
+pnpm run db:migrate
+pnpm run dev
 ```
 
 ## 📁 Estrutura dos Arquivos
 
 ```
 scripts/
-├── duplicate-app.sh          # Script principal de duplicação
+├── duplicate-app.sh          # Transformação local (modifica projeto atual)
+├── clone-and-duplicate.sh    # Cópia externa (cria novo projeto)
 ├── refactor-domain.js        # Refatoração automática de código
 ├── setup-new-repo.sh         # Configuração de novo Git repo
 └── validate-deployment.sh    # Validação pré-deploy

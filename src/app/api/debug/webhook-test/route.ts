@@ -45,4 +45,14 @@ async function debugWebhookTestHandler(_request: NextRequest) {
   }
 }
 
-export const POST = withDebugSecurity(debugWebhookTestHandler);
+export async function POST(request: NextRequest) {
+  // Only allow in development
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Debug endpoints not available in production' },
+      { status: 404 }
+    );
+  }
+
+  return debugWebhookTestHandler(request);
+}

@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
  * Security middleware for debug endpoints
  * Ensures debug routes are only accessible in development or by authorized admins
  */
-export async function withDebugSecurity<T extends any[]>(
+export async function withDebugSecurity<T extends unknown[]>(
   handler: (request: NextRequest, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {

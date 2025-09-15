@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
  * Authentication middleware for API routes
  * Ensures user is authenticated before accessing protected endpoints
  */
-export async function withAuth<T extends any[]>(
+export async function withAuth<T extends unknown[]>(
   handler: (request: NextRequest, userId: string, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
@@ -57,7 +57,7 @@ export async function withAuth<T extends any[]>(
  * Optional authentication middleware - allows both authenticated and anonymous access
  * Provides user info if available
  */
-export async function withOptionalAuth<T extends any[]>(
+export async function withOptionalAuth<T extends unknown[]>(
   handler: (request: NextRequest, userId: string | null, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
@@ -89,7 +89,7 @@ export async function withOptionalAuth<T extends any[]>(
  * CSRF Protection middleware
  * Validates CSRF tokens for state-changing operations
  */
-export async function withCSRF<T extends any[]>(
+export async function withCSRF<T extends unknown[]>(
   handler: (request: NextRequest, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
@@ -106,7 +106,7 @@ export async function withCSRF<T extends any[]>(
         'https://localhost:3000'
       ].filter(Boolean);
 
-      if (!origin || !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      if (!origin || !allowedOrigins.some(allowed => allowed && origin.startsWith(allowed))) {
         return NextResponse.json(
           { error: 'Invalid origin' },
           { status: 403 }
@@ -125,13 +125,13 @@ export async function withCSRF<T extends any[]>(
  * Input validation middleware
  * Validates and sanitizes request data
  */
-export async function withValidation<T extends any[]>(
+export async function withValidation<T extends unknown[]>(
   validationRules: ValidationRules,
-  handler: (request: NextRequest, validatedData: any, ...args: T) => Promise<NextResponse>
+  handler: (request: NextRequest, validatedData: Record<string, unknown>, ...args: T) => Promise<NextResponse>
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
     try {
-      let data: any = {};
+      let data: Record<string, unknown> = {};
 
       // Parse request data based on content type
       const contentType = request.headers.get('content-type') || '';
@@ -166,7 +166,7 @@ export async function withValidation<T extends any[]>(
         );
       }
 
-      return handler(request, validationResult.data, ...args);
+      return handler(request, validationResult.data || {}, ...args);
     } catch (error) {
       return NextResponse.json(
         { error: 'Request processing failed' },
@@ -210,13 +210,13 @@ interface ValidationRules {
 
 interface ValidationResult {
   isValid: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   errors?: string[];
 }
 
-function validateData(data: any, rules: ValidationRules): ValidationResult {
+function validateData(data: Record<string, unknown>, rules: ValidationRules): ValidationResult {
   const errors: string[] = [];
-  const validatedData: any = {};
+  const validatedData: Record<string, unknown> = {};
 
   for (const [field, rule] of Object.entries(rules)) {
     const value = data[field];

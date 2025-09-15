@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth, withCSRF } from '@/lib/auth-middleware';
 import { validateFileContent, validateFileName } from '@/lib/file-security';
 import { TattooProcessor } from '@/lib/services/tattoo-processor';
 import { CreditsService } from '@/lib/services/credits-service';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export const maxDuration = 60; // 60 seconds for Vercel Pro
 export const dynamic = 'force-dynamic';
@@ -216,16 +217,11 @@ async function tattooProcessHandler(request: NextRequest, userId: string) {
 
   } catch (error) {
     console.error('Tattoo processing error:', error);
-    
+
     // Rollback credit reservation on any error
     if (reservationId) {
       try {
-        const session = await auth.api.getSession({
-          headers: await headers(),
-        });
-        if (session?.user?.id) {
-          await CreditsService.rollbackCreditReservation(session.user.id, reservationId);
-        }
+        await CreditsService.rollbackCreditReservation(userId, reservationId);
       } catch (rollbackError) {
         console.error('Error rolling back credit reservation in catch:', rollbackError);
       }
@@ -255,4 +251,15 @@ async function tattooProcessHandler(request: NextRequest, userId: string) {
   }
 }
 
-export const POST = withCSRF(withAuth(tattooProcessHandler));
+export async function POST(request: NextRequest) {
+  // Apply auth middleware manually
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
+  return tattooProcessHandler(request, session.user.id);
+}

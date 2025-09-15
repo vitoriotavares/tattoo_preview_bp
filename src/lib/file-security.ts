@@ -156,7 +156,7 @@ export function validateFileContent(buffer: ArrayBuffer, options: FileValidation
 /**
  * Matches byte pattern with support for wildcards (undefined values)
  */
-function matchesPattern(bytes: Uint8Array, pattern: (number | undefined)[]): boolean {
+function matchesPattern(bytes: Uint8Array, pattern: readonly (number | undefined)[]): boolean {
   if (bytes.length < pattern.length) {
     return false;
   }

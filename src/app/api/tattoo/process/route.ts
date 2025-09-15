@@ -1,28 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth, withCSRF } from '@/lib/auth-middleware';
+import { validateFileContent, validateFileName } from '@/lib/file-security';
 import { TattooProcessor } from '@/lib/services/tattoo-processor';
 import { CreditsService } from '@/lib/services/credits-service';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 export const maxDuration = 60; // 60 seconds for Vercel Pro
 export const dynamic = 'force-dynamic';
 
 type TattooMode = 'add' | 'remove' | 'enhance';
 
-export async function POST(request: NextRequest) {
+async function tattooProcessHandler(request: NextRequest, userId: string) {
   let reservationId: string | null = null;
-  
+
   try {
-    // Get user session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
 
     // Reserve credit first (secure transaction)
     const creditReservation = await CreditsService.reserveCredit(userId);
@@ -71,33 +61,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file sizes (max 15MB each - increased for compressed images)
-    const maxSize = 15 * 1024 * 1024; // 15MB
-    if (bodyImageFile.size > maxSize) {
+    // Validate file names for security
+    const bodyFileNameValidation = validateFileName(bodyImageFile.name);
+    if (!bodyFileNameValidation.isValid) {
       return NextResponse.json(
-        { error: 'Imagem do corpo muito grande (máximo 15MB). Tente comprimir a imagem ou usar uma foto menor.' },
-        { status: 413 } // Request Entity Too Large
+        { error: `Nome de arquivo inválido: ${bodyFileNameValidation.error}` },
+        { status: 400 }
       );
     }
 
-    if (tattooImageFile && tattooImageFile.size > maxSize) {
+    if (tattooImageFile) {
+      const tattooFileNameValidation = validateFileName(tattooImageFile.name);
+      if (!tattooFileNameValidation.isValid) {
+        return NextResponse.json(
+          { error: `Nome de arquivo da tatuagem inválido: ${tattooFileNameValidation.error}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Convert files to buffers for content validation
+    const bodyImageBuffer = await bodyImageFile.arrayBuffer();
+    const tattooImageBuffer = tattooImageFile ? await tattooImageFile.arrayBuffer() : null;
+
+    // Validate body image content
+    const bodyValidation = validateFileContent(bodyImageBuffer, {
+      maxSize: 15 * 1024 * 1024, // 15MB
+      allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+      strictValidation: true,
+      scanContent: true
+    });
+
+    if (!bodyValidation.isValid) {
       return NextResponse.json(
-        { error: 'Imagem da tatuagem muito grande (máximo 15MB). Tente comprimir a imagem ou usar uma foto menor.' },
-        { status: 413 } // Request Entity Too Large
+        { error: `Imagem do corpo inválida: ${bodyValidation.error}` },
+        { status: 400 }
       );
     }
 
-    // Convert files to buffers
-    const bodyImageBuffer = Buffer.from(await bodyImageFile.arrayBuffer());
-    const tattooImageBuffer = tattooImageFile 
-      ? Buffer.from(await tattooImageFile.arrayBuffer())
-      : null;
+    // Log security warnings if any
+    if (bodyValidation.securityWarnings?.length) {
+      console.warn('Body image security warnings:', bodyValidation.securityWarnings);
+    }
+
+    // Validate tattoo image content if provided
+    if (tattooImageBuffer) {
+      const tattooValidation = validateFileContent(tattooImageBuffer, {
+        maxSize: 15 * 1024 * 1024, // 15MB
+        allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+        strictValidation: true,
+        scanContent: true
+      });
+
+      if (!tattooValidation.isValid) {
+        return NextResponse.json(
+          { error: `Imagem da tatuagem inválida: ${tattooValidation.error}` },
+          { status: 400 }
+        );
+      }
+
+      // Log security warnings if any
+      if (tattooValidation.securityWarnings?.length) {
+        console.warn('Tattoo image security warnings:', tattooValidation.securityWarnings);
+      }
+    }
+
+    // Convert validated buffers to Buffer objects for processing
+    const bodyImageBuf = Buffer.from(bodyImageBuffer);
+    const tattooImageBuf = tattooImageBuffer ? Buffer.from(tattooImageBuffer) : null;
 
     // Process the tattoo
     const processingResult = await TattooProcessor.processTattoo(
       mode,
-      bodyImageBuffer,
-      tattooImageBuffer,
+      bodyImageBuf,
+      tattooImageBuf,
       {
         bodyPart,
         size,
@@ -217,3 +254,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withCSRF(withAuth(tattooProcessHandler));

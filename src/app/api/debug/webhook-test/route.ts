@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withDebugSecurity } from '@/lib/debug-security';
 import { CreditsService } from '@/lib/services/credits-service';
 import Stripe from 'stripe';
 
-export async function POST(_request: NextRequest) {
+async function debugWebhookTestHandler(_request: NextRequest) {
   try {
-    // Only allow in development
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json(
-        { error: 'This endpoint is only available in development' },
-        { status: 403 }
-      );
-    }
 
     // Simulate a Stripe checkout session with metadata
     const mockSession = {
@@ -44,10 +38,11 @@ export async function POST(_request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Debug webhook test error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Test failed' },
+      { error: 'Webhook test failed', debug: true },
       { status: 500 }
     );
   }
 }
+
+export const POST = withDebugSecurity(debugWebhookTestHandler);

@@ -1,31 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { withDebugSecurity } from '@/lib/debug-security';
 import { db } from '@/lib/db';
 import { userCredits, purchases } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
-// This route is only for debugging
-export async function GET(request: NextRequest) {
+async function debugSessionHandler(request: NextRequest) {
   try {
-    // Only allow in development
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json(
-        { error: 'This endpoint is only available in development' },
-        { status: 403 }
-      );
-    }
-
-    // Get user session
+    // Get user session (already validated by withDebugSecurity)
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = session!.user!.id;
 
     // Get current user credits
     const credits = await db
@@ -34,26 +22,34 @@ export async function GET(request: NextRequest) {
       .where(eq(userCredits.userId, userId))
       .limit(1);
 
-    // Get recent purchases
+    // Get recent purchases (limit sensitive data exposure)
     const recentPurchases = await db
-      .select()
+      .select({
+        id: purchases.id,
+        credits: purchases.credits,
+        status: purchases.status,
+        createdAt: purchases.createdAt,
+      })
       .from(purchases)
       .where(eq(purchases.userId, userId))
       .orderBy(desc(purchases.createdAt))
-      .limit(5);
+      .limit(3); // Reduced from 5 to 3
 
     return NextResponse.json({
-      userId,
+      userId: userId.substring(0, 8) + '...', // Partially masked
       credits: credits[0] || null,
       recentPurchases,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      debug: true
     });
 
   } catch (error) {
-    console.error('Debug session error:', error);
+    // Don't expose internal error details
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Debug failed' },
+      { error: 'Debug operation failed' },
       { status: 500 }
     );
   }
 }
+
+export const GET = withDebugSecurity(debugSessionHandler);

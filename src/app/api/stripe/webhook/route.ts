@@ -3,17 +3,47 @@ import { verifyStripeWebhookSignature } from '@/lib/stripe';
 import { CreditsService } from '@/lib/services/credits-service';
 import Stripe from 'stripe';
 
+// Simple in-memory cache for processed events (in production, use Redis or database)
+const processedEvents = new Map<string, number>();
+
+// Clean up old entries every hour
+setInterval(() => {
+  const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
+  for (const [eventId, timestamp] of processedEvents.entries()) {
+    if (timestamp < cutoff) {
+      processedEvents.delete(eventId);
+    }
+  }
+}, 60 * 60 * 1000); // 1 hour
+
+async function isEventProcessed(eventId: string): Promise<boolean> {
+  return processedEvents.has(eventId);
+}
+
+function markEventProcessed(eventId: string): void {
+  processedEvents.set(eventId, Date.now());
+}
+
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const requestId = `wh_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
+
   try {
     console.log(`=== WEBHOOK START [${requestId}] ===`);
-    
+
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
+
+    // Security: Check request size
+    if (body.length > 1024 * 1024) { // 1MB limit
+      console.error(`[${requestId}] Request too large: ${body.length} bytes`);
+      return NextResponse.json(
+        { error: 'Request too large' },
+        { status: 413 }
+      );
+    }
 
     if (!signature) {
       console.error(`[${requestId}] Missing stripe-signature header`);
@@ -34,6 +64,28 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid signature' },
         { status: 400 }
       );
+    }
+
+    // Security: Check event timestamp to prevent replay attacks
+    const eventTimestamp = event.created;
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeDifference = currentTime - eventTimestamp;
+    const tolerance = 300; // 5 minutes tolerance
+
+    if (timeDifference > tolerance) {
+      console.error(`[${requestId}] Event too old: ${timeDifference}s ago (tolerance: ${tolerance}s)`);
+      return NextResponse.json(
+        { error: 'Event timestamp too old' },
+        { status: 400 }
+      );
+    }
+
+    // Additional security: Check for potential duplicate events
+    // Note: In production, you should implement proper idempotency checking with a database
+    const eventId = event.id;
+    if (await isEventProcessed(eventId)) {
+      console.warn(`[${requestId}] Event ${eventId} already processed, ignoring duplicate`);
+      return NextResponse.json({ received: true, status: 'duplicate' });
     }
 
     // Handle the event
@@ -101,13 +153,16 @@ export async function POST(request: NextRequest) {
         console.log(`[${requestId}] Unhandled event type: ${event.type}`);
     }
 
+    // Mark event as processed to prevent duplicates
+    markEventProcessed(eventId);
+
     const processingTime = Date.now() - startTime;
     console.log(`[${requestId}] === WEBHOOK COMPLETED in ${processingTime}ms ===`);
-    
-    return NextResponse.json({ 
-      received: true, 
+
+    return NextResponse.json({
+      received: true,
       requestId,
-      processingTime 
+      processingTime
     });
 
   } catch (error) {

@@ -1,0 +1,105 @@
+{
+  "_comments": [
+    "Template de configuração para duplicação de app",
+    "Copie este arquivo para app.config.json e configure conforme necessário"
+  ],
+
+  "appName": "photo-restoration-ai",
+  "displayName": "Photo Restoration AI",
+  "description": "Restaure fotos antigas com IA avançada",
+  "domain": "photorestoration.ai",
+  "oldDomain": "tattoopreview.com",
+
+  "processingType": "photo-restoration",
+  "processingModes": {
+    "restore": {
+      "title": "Restaurar Foto",
+      "description": "Restaure fotos antigas danificadas",
+      "needsSecondImage": false,
+      "color": "bg-blue-50 border-blue-200 dark:bg-blue-950/20"
+    },
+    "enhance": {
+      "title": "Melhorar Qualidade",
+      "description": "Aumente a qualidade e resolução",
+      "needsSecondImage": false,
+      "color": "bg-green-50 border-green-200 dark:bg-green-950/20"
+    },
+    "colorize": {
+      "title": "Colorir Foto",
+      "description": "Adicione cores naturais a fotos P&B",
+      "needsSecondImage": false,
+      "color": "bg-purple-50 border-purple-200 dark:bg-purple-950/20"
+    }
+  },
+
+  "branding": {
+    "primaryColor": "#3B82F6",
+    "heroTitle": "Restaure Suas Fotos em Segundos",
+    "heroSubtitle": "3 restaurações grátis • Resultado fotorrealista • Sem cadastro",
+    "ctaText": "Restaurar Agora (3 Grátis)"
+  },
+
+  "seo": {
+    "keywords": ["restauração de fotos", "IA", "fotos antigas", "enhancement"],
+    "metaDescription": "Restaure fotos antigas com IA avançada. Resultado fotorrealista em segundos."
+  },
+
+  "textReplacements": {
+    "tattoo": "photo",
+    "tatuagem": "foto",
+    "tatuagens": "fotos",
+    "Tattoo": "Photo",
+    "Tatuagem": "Foto",
+    "TATTOO": "PHOTO",
+    "TATUAGEM": "FOTO",
+    "TattooPreview": "PhotoRestoration",
+    "tattoo-preview": "photo-restoration",
+    "tattoopreview": "photorestoration"
+  },
+
+  "imageReplacements": {
+    "/images/": "/images/restoration/",
+    "tattoo_": "photo_",
+    "_tattoo": "_photo",
+    "_tatu": "_foto"
+  },
+
+  "routeReplacements": {
+    "/tattoo": "/restore",
+    "/estilos": "/gallery",
+    "/galeria": "/gallery"
+  },
+
+  "examples": {
+    "before": "/images/old_damaged.jpg",
+    "after": "/images/old_restored.jpg",
+    "description": "Foto de 1950 completamente restaurada"
+  },
+
+  "prompts": {
+    "restore": "Restore this old damaged photograph. Fix scratches, tears, stains, fading, and other damage. Enhance details, improve contrast, and make it look like a professional restoration while maintaining the original character and time period.",
+    "enhance": "Enhance this photograph by improving quality, sharpness, and details. Increase resolution, reduce noise, improve lighting, and make colors more vibrant while keeping it natural.",
+    "colorize": "Add realistic colors to this black and white photograph. Use historically accurate colors for the time period. Make skin tones natural, clothing appropriate for the era, and ensure the colorization looks authentic and not artificial."
+  },
+
+  "features": {
+    "restore": [
+      "Remoção de arranhões e rasgos",
+      "Correção de manchas e desbotamento",
+      "Reconstrução de partes danificadas",
+      "Preservação do caráter original"
+    ],
+    "enhance": [
+      "Aumento de resolução",
+      "Redução de ruído",
+      "Melhoria de contraste",
+      "Definição de detalhes"
+    ],
+    "colorize": [
+      "Cores historicamente precisas",
+      "Tons de pele naturais",
+      "Colorização realista",
+      "Preservação da autenticidade"
+    ]
+  }
+}

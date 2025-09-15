@@ -127,46 +127,53 @@ Generate a high-quality, photorealistic result showing the person with the tatto
   /**
    * Generate optimized prompt for removing tattoo
    */
-  private static generateRemoveTattooPrompt(location: string = "skin"): string {
-    return `Remove the tattoo from the ${location} while maintaining photorealistic skin appearance.
+  private static generateRemoveTattooPrompt(): string {
+    return `Step 1: Identify all tattoos visible in the image.
+Step 2: Keep the entire body intact - no body parts should be removed or altered.
+Step 3: Replace ONLY the tattoo ink areas with natural skin.
 
-Requirements:
-- Reconstruct underlying skin texture with natural pores and fine lines
-- Match surrounding skin tone variations and patterns perfectly
-- Preserve all natural body marks (moles, freckles, scars, birthmarks)
-- Maintain consistent lighting and shadows across the area
-- No visible artifacts, blur, smoothing, or digital editing marks
-- Keep the same skin age, condition, and natural imperfections
-- Ensure seamless blending with surrounding untouched skin
+Instructions:
+- Copy skin texture from areas near each tattoo
+- Match the exact skin tone from surrounding untouched skin
+- Preserve all moles, freckles, and natural marks that are not part of tattoos
+- Fill tattoo areas with realistic skin matching the person's skin type
+- Maintain natural skin details - no blur or smoothing
+- Keep original lighting and shadows consistent
 
-Technical Approach: Use advanced skin reconstruction techniques that analyze surrounding skin patterns and naturally fill the tattoo area with realistic skin texture that matches the person's natural skin characteristics.
+CRITICAL: Remove only the tattoo ink. The person's body must remain complete and unchanged.
+Do not alter body proportions, remove limbs, or change the person's appearance beyond removing tattoo ink.
 
-Do not change the aspect ratio or image dimensions.
-The result should look completely natural as if the tattoo never existed.`;
+The result should look completely natural as if the tattoos never existed.`;
   }
 
   /**
    * Generate optimized prompt for enhancing tattoo
    */
   private static generateEnhanceTattooPrompt(style: string = "traditional"): string {
-    return `Enhance and restore this existing tattoo to professional photography quality.
+    return `Step 1: Identify the tattoo and analyze its current condition.
+Step 2: Detect faded, blurry, or washed-out areas.
+Step 3: Apply these corrections:
 
-Adjustments needed:
-- Sharpen line work to crisp black definition and clean edges
-- Restore color vibrancy to fresh ink appearance 
-- Fix any fading, blur, or age-related deterioration
-- Enhance contrast between ink and skin for better definition
-- Preserve original artistic style and design intent completely
-- Apply subtle highlights to make the tattoo pop and appear fresh
-- Improve overall saturation while maintaining realistic ink appearance
-- Clean up any areas where the tattoo may appear washed out
+Black ink areas:
+- Make all black lines solid and dark
+- Sharpen all edges, remove any blur
+- Fill in any gaps in black linework
 
-Style: ${style} tattoo photography with professional lighting
-Quality: High-resolution tattoo portfolio standard
+Colored areas:
+- Identify original colors from visible vibrant parts
+- Restore faded areas to match the vibrant sections
+- If areas appear gray or washed out, restore with appropriate colors based on the design context
+- Make colors pop like fresh ink
 
-Preserve: Original design, proportions, and artistic elements.
-Do not change the aspect ratio or image dimensions.
-Do not alter the fundamental design - only enhance and restore quality.`;
+All areas:
+- Fix gaps and inconsistencies in the design
+- Remove any blur, fading, or unclear sections
+- Maintain the exact same design and proportions
+- Keep the original artistic style (${style})
+
+IMPORTANT: Only improve the quality and vibrancy. Do not change the design, add new elements, or alter the tattoo's appearance beyond restoration.
+
+Result: Make the tattoo look freshly healed with crisp lines and vibrant colors, like professional portfolio photography.`;
   }
 
   /**
@@ -292,9 +299,7 @@ Do not alter the fundamental design - only enhance and restore quality.`;
       const processedImage = await this.preprocessImage(imageBuffer);
 
       // Generate prompt
-      const prompt = this.generateRemoveTattooPrompt(
-        options.bodyPart || "skin area"
-      );
+      const prompt = this.generateRemoveTattooPrompt();
 
       // Prepare image for Gemini
       const images = [{

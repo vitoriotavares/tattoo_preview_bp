@@ -1,0 +1,119 @@
+{
+  "domains": {
+    "photo-restoration": {
+      "name": "photo-restoration-ai",
+      "display": "Photo Restoration AI",
+      "description": "Restaure fotos antigas com IA",
+      "keywords": ["restauração", "fotos antigas", "IA", "enhancement"],
+      "primaryColor": "#3B82F6",
+      "routes": {
+        "/tattoo": "/restore",
+        "/tattoo/editor": "/restore/editor",
+        "/estilos": "/gallery",
+        "/galeria": "/gallery"
+      }
+    },
+
+    "object-removal": {
+      "name": "object-removal-ai",
+      "display": "Object Removal AI",
+      "description": "Remova objetos indesejados de fotos",
+      "keywords": ["remoção de objetos", "edição de fotos", "IA", "cleanup"],
+      "primaryColor": "#EF4444",
+      "routes": {
+        "/tattoo": "/remove",
+        "/tattoo/editor": "/remove/editor"
+      }
+    },
+
+    "background-removal": {
+      "name": "background-removal-ai",
+      "display": "Background Removal AI",
+      "description": "Remova fundos de imagens automaticamente",
+      "keywords": ["remoção de fundo", "background", "IA", "cutout"],
+      "primaryColor": "#10B981",
+      "routes": {
+        "/tattoo": "/background",
+        "/tattoo/editor": "/background/editor"
+      }
+    },
+
+    "face-enhancement": {
+      "name": "face-enhancement-ai",
+      "display": "Face Enhancement AI",
+      "description": "Melhore retratos e selfies com IA",
+      "keywords": ["melhoria facial", "retrato", "IA", "selfie"],
+      "primaryColor": "#8B5CF6",
+      "routes": {
+        "/tattoo": "/enhance",
+        "/tattoo/editor": "/enhance/editor"
+      }
+    },
+
+    "art-generation": {
+      "name": "art-generation-ai",
+      "display": "Art Generation AI",
+      "description": "Transforme fotos em arte com IA",
+      "keywords": ["arte", "transformação", "IA", "artistic"],
+      "primaryColor": "#F59E0B",
+      "routes": {
+        "/tattoo": "/art",
+        "/tattoo/editor": "/art/editor"
+      }
+    }
+  },
+
+  "commonReplacements": {
+    "filePatterns": {
+      "tattoo-": "{domain}-",
+      "tattoo_": "{domain}_",
+      "_tattoo": "_{domain}",
+      "Tattoo": "{DisplayName}",
+      "TATTOO": "{DISPLAYNAME}"
+    },
+
+    "textPatterns": {
+      "tatuagem": "{mainConcept}",
+      "tatuagens": "{mainConceptPlural}",
+      "Tatuagem": "{MainConcept}",
+      "Tatuagens": "{MainConceptPlural}",
+      "tattoo": "{mainConcept}",
+      "tattoos": "{mainConceptPlural}",
+      "Tattoo": "{MainConcept}",
+      "Tattoos": "{MainConceptPlural}"
+    },
+
+    "concepts": {
+      "photo-restoration": {
+        "mainConcept": "foto",
+        "mainConceptPlural": "fotos",
+        "MainConcept": "Foto",
+        "MainConceptPlural": "Fotos"
+      },
+      "object-removal": {
+        "mainConcept": "objeto",
+        "mainConceptPlural": "objetos",
+        "MainConcept": "Objeto",
+        "MainConceptPlural": "Objetos"
+      },
+      "background-removal": {
+        "mainConcept": "fundo",
+        "mainConceptPlural": "fundos",
+        "MainConcept": "Fundo",
+        "MainConceptPlural": "Fundos"
+      },
+      "face-enhancement": {
+        "mainConcept": "rosto",
+        "mainConceptPlural": "rostos",
+        "MainConcept": "Rosto",
+        "MainConceptPlural": "Rostos"
+      },
+      "art-generation": {
+        "mainConcept": "arte",
+        "mainConceptPlural": "artes",
+        "MainConcept": "Arte",
+        "MainConceptPlural": "Artes"
+      }
+    }
+  }
+}

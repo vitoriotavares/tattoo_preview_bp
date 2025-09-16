@@ -258,11 +258,15 @@ export async function POST(request: NextRequest) {
     const processingTime = Date.now() - startTime;
     console.log(`[${requestId}] === WEBHOOK COMPLETED in ${processingTime}ms ===`);
 
-    return NextResponse.json({
+    // Ensure we return 200 OK without any redirects
+    const response = NextResponse.json({
       received: true,
       requestId,
       processingTime
-    });
+    }, { status: 200 });
+
+    console.log(`[${requestId}] Responding with status: 200`);
+    return response;
 
   } catch (error) {
     const processingTime = Date.now() - startTime;

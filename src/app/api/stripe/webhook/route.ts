@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // TEMPORARY: Skip signature verification to avoid 307 redirect issue
     // Parse event directly from body
-    let event: { type: string; id: string; data: { object: any }; created: number };
+    let event: { type: string; id: string; data: { object: unknown }; created: number };
     try {
       event = JSON.parse(body);
       console.log(`[${requestId}] Event parsed successfully: ${event.type}`);

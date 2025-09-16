@@ -26,15 +26,32 @@ function markEventProcessed(eventId: string): void {
 
 export const maxDuration = 30;
 
+// Add a GET endpoint for testing webhook accessibility
+export async function GET() {
+  console.log('GET request to webhook endpoint - testing accessibility');
+  return NextResponse.json({
+    status: 'Webhook endpoint is live',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    version: '2.0'
+  });
+}
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const requestId = `wh_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   try {
     console.log(`=== WEBHOOK START [${requestId}] ===`);
+    console.log(`[${requestId}] Request URL:`, request.url);
+    console.log(`[${requestId}] Request method:`, request.method);
+    console.log(`[${requestId}] Headers:`, Object.fromEntries(request.headers.entries()));
 
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
+
+    console.log(`[${requestId}] Body length:`, body.length);
+    console.log(`[${requestId}] Has signature:`, !!signature);
 
     // Security: Check request size
     if (body.length > 1024 * 1024) { // 1MB limit

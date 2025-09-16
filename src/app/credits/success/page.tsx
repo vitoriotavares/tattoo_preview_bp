@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,40 +13,60 @@ function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const { refreshCredits, credits, isLoading } = useCredits();
   const [isRefreshing, setIsRefreshing] = useState(true);
+  const hasStartedRef = useRef(false);
 
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    // Prevent multiple runs on component re-renders
+    if (!sessionId || hasStartedRef.current) {
+      if (!sessionId) setIsRefreshing(false);
+      return;
+    }
+
+    hasStartedRef.current = true;
+
     // Refresh credits when the page loads
     const refreshData = async () => {
-      if (sessionId) {
-        // Wait longer to ensure webhook has processed and try multiple times
-        let attempts = 0;
-        const maxAttempts = 5;
-        
-        const tryRefresh = async () => {
-          attempts++;
-          console.log(`Refreshing credits - attempt ${attempts}/${maxAttempts}`);
-          
-          refreshCredits();
-          
-          // If we've tried less than max attempts, wait and try again
-          if (attempts < maxAttempts) {
-            setTimeout(tryRefresh, 2000); // Wait 2 seconds between attempts
-          } else {
-            setIsRefreshing(false);
-          }
-        };
-        
-        // Start first attempt after 3 seconds
-        setTimeout(tryRefresh, 3000);
-      } else {
-        setIsRefreshing(false);
-      }
+      console.log('Waiting for webhook processing...');
+
+      // Initial delay to allow webhook processing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      let attempts = 0;
+      const maxAttempts = 8;
+
+      const tryRefresh = async (): Promise<void> => {
+        attempts++;
+        console.log(`Refreshing credits - attempt ${attempts}/${maxAttempts}`);
+
+        // Trigger refresh
+        refreshCredits();
+
+        // Wait for the query to settle
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Check if credits were loaded and have a positive balance
+        if (credits && credits.availableCredits > 0) {
+          console.log('Credits successfully loaded:', credits.availableCredits);
+          setIsRefreshing(false);
+          return;
+        }
+
+        // If we've tried less than max attempts, try again
+        if (attempts < maxAttempts) {
+          await tryRefresh();
+        } else {
+          console.log('Max attempts reached, stopping refresh');
+          setIsRefreshing(false);
+        }
+      };
+
+      await tryRefresh();
     };
 
     refreshData();
-  }, [sessionId, refreshCredits]);
+  }, [sessionId, refreshCredits, credits]);
 
   if (!sessionId) {
     return (

@@ -149,24 +149,34 @@ The result should look completely natural as if the tattoo never existed.`;
    * Generate optimized prompt for enhancing tattoo
    */
   private static generateEnhanceTattooPrompt(style: string = "traditional"): string {
-    return `Enhance and restore this existing tattoo to professional photography quality.
+    return `Analyze and enhance this existing tattoo by intelligently adding vibrant colors while maintaining photorealistic naturalness.
 
-Adjustments needed:
-- Sharpen line work to crisp black definition and clean edges
-- Restore color vibrancy to fresh ink appearance 
-- Fix any fading, blur, or age-related deterioration
-- Enhance contrast between ink and skin for better definition
-- Preserve original artistic style and design intent completely
-- Apply subtle highlights to make the tattoo pop and appear fresh
-- Improve overall saturation while maintaining realistic ink appearance
-- Clean up any areas where the tattoo may appear washed out
+ANALYSIS PHASE:
+1. Carefully identify and understand the tattoo design, theme, and artistic elements
+2. Recognize which parts are currently black/gray and which already have color
+3. Determine the most appropriate color palette based on the design's meaning and style
 
-Style: ${style} tattoo photography with professional lighting
-Quality: High-resolution tattoo portfolio standard
+ENHANCEMENT INSTRUCTIONS:
+- Add vivid, natural colors to black and white portions of the tattoo
+- Choose colors that complement the design theme (e.g., realistic colors for nature themes, bold colors for traditional designs)
+- Maintain crisp black outlines and definition where appropriate
+- Ensure color saturation appears as fresh, well-healed tattoo ink
+- Blend colors naturally with existing colored areas if any
+- Preserve all original design proportions and artistic intent
+- Keep realistic skin texture and lighting integration
 
-Preserve: Original design, proportions, and artistic elements.
+QUALITY STANDARDS:
+✓ Colors should look like professional tattoo ink, not digital painting
+✓ Maintain natural ink saturation levels (not oversaturated or artificial)
+✓ Preserve skin texture and natural body contours
+✓ Ensure colors follow the tattoo's natural flow and design logic
+✓ Keep realistic shadows and highlights matching ambient lighting
+
+Style: ${style} tattoo with intelligent color enhancement
+Result: Transform into a vibrant, naturally colored tattoo that looks professionally done
+
 Do not change the aspect ratio or image dimensions.
-Do not alter the fundamental design - only enhance and restore quality.`;
+Focus on making black/gray areas colorful while keeping the enhancement realistic and tattoo-appropriate.`;
   }
 
   /**

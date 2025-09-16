@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Processing with mock session:', mockSession);
 
-    const success = await CreditsService.handleStripePaymentSuccess(mockSession as any);
+    const success = await CreditsService.handleStripePaymentSuccess(mockSession as import('stripe').Stripe.Checkout.Session);
 
     if (success) {
       console.log('✅ Manual processing successful');

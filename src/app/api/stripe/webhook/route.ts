@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyStripeWebhookSignature } from '@/lib/stripe';
+// import { verifyStripeWebhookSignature } from '@/lib/stripe';
 import { CreditsService } from '@/lib/services/credits-service';
 import Stripe from 'stripe';
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // TEMPORARY: Skip signature verification to avoid 307 redirect issue
     // Parse event directly from body
-    let event: any;
+    let event: { type: string; id: string; data: { object: any }; created: number };
     try {
       event = JSON.parse(body);
       console.log(`[${requestId}] Event parsed successfully: ${event.type}`);

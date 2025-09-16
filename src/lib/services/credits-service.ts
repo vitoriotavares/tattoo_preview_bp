@@ -404,6 +404,13 @@ export class CreditsService {
         packageId,
         credits: creditPackage.credits.toString(),
       },
+      payment_intent_data: {
+        metadata: {
+          userId,
+          packageId,
+          credits: creditPackage.credits.toString(),
+        },
+      },
       success_url: successUrl,
       cancel_url: cancelUrl,
       customer_email: undefined, // Will be filled by Stripe
@@ -446,15 +453,21 @@ export class CreditsService {
       
       console.log(`Session ${sessionId} - Adding ${creditsToAdd} credits to user ${userId}`);
       
-      // Check if we already processed this session
+      // Check if we already processed this payment using multiple identifiers
+      const paymentIntentId = session.payment_intent as string;
+
       const existingPurchase = await db
         .select()
         .from(purchases)
-        .where(eq(purchases.stripeSessionId, sessionId))
+        .where(
+          paymentIntentId
+            ? eq(purchases.stripePaymentIntentId, paymentIntentId)
+            : eq(purchases.stripeSessionId, sessionId)
+        )
         .limit(1);
-      
+
       if (existingPurchase.length > 0) {
-        console.log(`⚠️  Session ${sessionId} - Already processed, skipping duplicate`);
+        console.log(`⚠️  Payment already processed (Session: ${sessionId}, PI: ${paymentIntentId}), skipping duplicate`);
         return true;
       }
       

@@ -137,8 +137,45 @@ export async function POST(request: NextRequest) {
 
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log('Payment intent succeeded:', paymentIntent.id);
-        // Additional logic if needed
+        console.log(`[${requestId}] === PROCESSING PAYMENT INTENT SUCCEEDED ===`);
+        console.log(`[${requestId}] Payment Intent ID:`, paymentIntent.id);
+        console.log(`[${requestId}] Status:`, paymentIntent.status);
+        console.log(`[${requestId}] Payment Intent metadata:`, JSON.stringify(paymentIntent.metadata));
+
+        // Check if we have metadata for credit purchase
+        if (paymentIntent.metadata && Object.keys(paymentIntent.metadata).length > 0) {
+          const { userId, packageId, credits } = paymentIntent.metadata;
+
+          if (userId && packageId && credits) {
+            console.log(`[${requestId}] Found credit purchase metadata in payment intent, processing...`);
+
+            // Create a mock session object for compatibility with existing logic
+            const mockSession = {
+              id: `pi_session_${paymentIntent.id}`,
+              payment_status: 'paid',
+              payment_intent: paymentIntent.id,
+              amount_total: paymentIntent.amount,
+              currency: paymentIntent.currency,
+              metadata: paymentIntent.metadata
+            } as Stripe.Checkout.Session;
+
+            const success = await CreditsService.handleStripePaymentSuccess(mockSession);
+
+            if (!success) {
+              console.error(`[${requestId}] ❌ Failed to process payment intent:`, paymentIntent.id);
+              return NextResponse.json(
+                { error: 'Failed to process payment intent' },
+                { status: 500 }
+              );
+            }
+
+            console.log(`[${requestId}] ✅ Successfully processed payment intent:`, paymentIntent.id);
+          } else {
+            console.log(`[${requestId}] ⚠️ Payment intent ${paymentIntent.id} succeeded but missing credit purchase metadata`);
+          }
+        } else {
+          console.log(`[${requestId}] ⚠️ Payment intent ${paymentIntent.id} succeeded but no metadata found`);
+        }
         break;
       }
 
@@ -146,6 +183,51 @@ export async function POST(request: NextRequest) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log('Payment intent failed:', paymentIntent.id);
         // Handle failed payments if needed
+        break;
+      }
+
+      case 'charge.updated': {
+        const charge = event.data.object as Stripe.Charge;
+        console.log(`[${requestId}] === PROCESSING CHARGE UPDATED ===`);
+        console.log(`[${requestId}] Charge ID:`, charge.id);
+        console.log(`[${requestId}] Payment Intent:`, charge.payment_intent);
+        console.log(`[${requestId}] Charge Status:`, charge.status);
+        console.log(`[${requestId}] Charge metadata:`, JSON.stringify(charge.metadata));
+
+        // Only process if charge is succeeded and we have metadata
+        if (charge.status === 'succeeded' && charge.metadata && Object.keys(charge.metadata).length > 0) {
+          const { userId, packageId, credits } = charge.metadata;
+
+          if (userId && packageId && credits) {
+            console.log(`[${requestId}] Found metadata in charge, processing payment...`);
+
+            // Create a mock session object for compatibility with existing logic
+            const mockSession = {
+              id: `charge_session_${charge.id}`,
+              payment_status: 'paid',
+              payment_intent: charge.payment_intent,
+              amount_total: charge.amount,
+              currency: charge.currency,
+              metadata: charge.metadata
+            } as Stripe.Checkout.Session;
+
+            const success = await CreditsService.handleStripePaymentSuccess(mockSession);
+
+            if (!success) {
+              console.error(`[${requestId}] ❌ Failed to process charge payment:`, charge.id);
+              return NextResponse.json(
+                { error: 'Failed to process charge payment' },
+                { status: 500 }
+              );
+            }
+
+            console.log(`[${requestId}] ✅ Successfully processed charge payment:`, charge.id);
+          } else {
+            console.log(`[${requestId}] ⚠️ Charge ${charge.id} succeeded but missing metadata, likely not a credit purchase`);
+          }
+        } else {
+          console.log(`[${requestId}] ⚠️ Charge ${charge.id} not succeeded or no metadata, skipping`);
+        }
         break;
       }
 

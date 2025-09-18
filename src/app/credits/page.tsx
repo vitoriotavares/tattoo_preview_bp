@@ -70,6 +70,14 @@ export default function CreditsPage() {
         </Card>
       )}
 
+      {/* Pricing Plans */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-center mb-6">
+          Escolha seu Pacote de Créditos
+        </h2>
+        <PackageCards />
+      </div>
+
       {/* Benefits */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
@@ -79,7 +87,7 @@ export default function CreditsPage() {
             <p className="text-xs text-muted-foreground">Resultados em poucos segundos</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -87,7 +95,7 @@ export default function CreditsPage() {
             <p className="text-xs text-muted-foreground">IA de última geração</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -95,7 +103,7 @@ export default function CreditsPage() {
             <p className="text-xs text-muted-foreground">Use quando quiser</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <Coins className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -103,14 +111,6 @@ export default function CreditsPage() {
             <p className="text-xs text-muted-foreground">Pacotes econômicos</p>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Pricing Plans */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Escolha seu Pacote de Créditos
-        </h2>
-        <PackageCards />
       </div>
 
       {/* FAQ */}
